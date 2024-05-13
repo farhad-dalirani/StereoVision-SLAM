@@ -2,5 +2,6 @@
 data/*
 build/*
 test/*
-bin/*
-lib/*
+bin/t*
+bin/run*
+lib/l*
