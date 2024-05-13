@@ -1,3 +1,6 @@
 .vscode
 data/*
 build/*
+test/*
+bin/*
+lib/*

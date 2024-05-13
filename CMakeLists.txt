@@ -39,6 +39,9 @@ Find_Package(Sophus REQUIRED)
 Find_Package(CSparse REQUIRED)
 include_directories(${CSPARSE_INCLUDE_DIR})
 
+# gtest
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
 
 SET(G2O_LIBS g2o_csparse_extension g2o_stuff g2o_core g2o_types_slam3d g2o_solver_csparse)
 
@@ -49,6 +52,7 @@ set(THIRD_PARTY_LIBS
         g2o_core g2o_stuff g2o_types_sba g2o_solver_csparse g2o_csparse_extension g2o_types_slam3d
         pthread
         ${CSPARSE_LIBRARY}
+        ${GTEST_BOTH_LIBRARIES}
         )
 
 
@@ -57,3 +61,4 @@ set(THIRD_PARTY_LIBS
 include_directories(${PROJECT_SOURCE_DIR}/include)
 add_subdirectory(src)
 add_subdirectory(app)
+add_subdirectory(test)

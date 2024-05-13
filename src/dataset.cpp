@@ -1,5 +1,7 @@
 #include<StereoVisionSLAM/dataset.h>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 
 namespace slam
 {
@@ -63,12 +65,54 @@ namespace slam
             Camera::Ptr new_camera = std::make_shared<Camera>(
                 K(0, 0), K(1, 1), K(0, 2), K(1, 2),
                 baseline, Sophus::SE3d(Sophus::SO3d(), t));
-            std::cout << *new_camera << std::endl;
+            
             cameras_.push_back(new_camera);
         }
 
         fin.close();
         current_image_index_ = 0;
     }
+
+    Camera::Ptr Dataset::GetCamera(int camera_id) const
+    {
+        return cameras_.at(camera_id);
+    }
+
+    Frame::Ptr Dataset::NextFrame()
+    {
+        // Create and return next frame in video sequence
+
+        std::ostringstream file_name_1;
+        std::ostringstream file_name_2;
+
+        // Path of left and right camera images
+        file_name_1 << dataset_path_ << "/image_" << left_cam_index_ << 
+                 "/" << std::setw(6) << std::setfill('0') << current_image_index_ << ".png";
+        file_name_2 << dataset_path_ << "/image_" << right_cam_index_ << 
+                "/" << std::setw(6) << std::setfill('0') << current_image_index_ << ".png";
+
+        // Load images
+        cv::Mat left_img = cv::imread(file_name_1.str(), flag_read_img_);
+        cv::Mat right_img = cv::imread(file_name_2.str(), flag_read_img_);
+
+        if ((left_img.data == nullptr) or (right_img.data == nullptr))
+        {
+            return nullptr;
+        }
+
+        // Down-sample images by factor of two for computational efficiency
+        cv::Mat left_img_resized, right_img_resized;
+        cv::resize(left_img, left_img_resized, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+        cv::resize(right_img, right_img_resized, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+
+        // Create new frame
+        Frame::Ptr new_frame = Frame::CreateFrame();
+        new_frame->left_img_ = left_img_resized;
+        new_frame->right_img_ = right_img_resized;
+        current_image_index_++;
+
+        return new_frame;
+    }
+
 
 }

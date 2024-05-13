@@ -3,6 +3,7 @@
 
 #include "StereoVisionSLAM/common_include.h"
 #include "StereoVisionSLAM/camera.h"
+#include "StereoVisionSLAM/frame.h"
 
 namespace slam
 {
@@ -15,12 +16,28 @@ namespace slam
 
             Dataset(const std::string &dataset_path);
 
+            // Read dataset information including cameras parameters
             void initialize();
 
+            // Create and return next frame in sequence
+            Frame::Ptr NextFrame();
+
+            // Get camera by id
+            Camera::Ptr GetCamera(int camera_id) const;
+
         private:
+            // Root path of video sequence in KITTI
             std::string dataset_path_;
-            int current_image_index_{0};
+            // KITTI has 4 cameras, we used cameras 0 and 1
+            int left_cam_index_{0};
+            int right_cam_index_{1};
+            // Flag for reading gray/color images
+            int flag_read_img_{cv::IMREAD_GRAYSCALE};
+            // Parameters of 4 cameras of KITTI
             std::vector<Camera::Ptr> cameras_;
+            // Indicates the index of the image to be read from the KITTI sequence 
+            int current_image_index_{0};
+            
     };
 
 }
