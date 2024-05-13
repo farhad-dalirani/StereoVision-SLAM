@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <list>
 
 // Eigen Library for for linear algebra,
 // matrix and vector operations, geometrical transformations, ...
