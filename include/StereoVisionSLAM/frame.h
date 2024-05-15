@@ -18,7 +18,7 @@ namespace slam
             unsigned long keyframe_id_{0};
             // A frame is keyframe if tracked points be less 
             // than a threshold
-            bool is_keyframe{false};
+            bool is_keyframe_{false};
             // Tcw: Transformation from world to frame 
             Sophus::SE3d pose_;
             // mutex for accessing pose
@@ -39,6 +39,8 @@ namespace slam
             
             // Factory construction pattern, assigning IDs
             static Ptr CreateFrame();
+            
+            void SetKeyFrame();
 
     };
 

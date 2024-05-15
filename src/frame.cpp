@@ -15,7 +15,14 @@ namespace slam
         return new_frame;
     }
 
-    Frame& Frame::operator=(const Frame& other) 
+    void Frame::SetKeyFrame()
+    {
+        static unsigned long keyframe_factory_id{0};
+        is_keyframe_ = true;
+        keyframe_id_ = keyframe_factory_id++;
+    }
+
+        Frame& Frame::operator=(const Frame& other) 
     {
         // Check for self-assignment
         if (this != &other) 
@@ -23,7 +30,7 @@ namespace slam
             // Copy data members from 'other' to 'this'
             id_ = other.id_;
             keyframe_id_ = other.keyframe_id_;
-            is_keyframe = other.is_keyframe;
+            is_keyframe_ = other.is_keyframe_;
             pose_ = other.pose_;
             // Deep copy of cv::Mat
             left_img_ = other.left_img_.clone(); 
@@ -46,5 +53,6 @@ namespace slam
         }
         return *this;
     }
+
 
 }
