@@ -1,7 +1,6 @@
 .vscode
 data/*
 build/*
-test/*
 bin/t*
 bin/run*
 lib/l*
