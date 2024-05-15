@@ -60,3 +60,23 @@ TEST_F(FrameTest, CreateFrameAndSetKeyFrame) {
     EXPECT_EQ(b->is_keyframe_, true);
 
 }
+
+TEST_F(FrameTest, SetAndGetPose) {
+    
+    // Create a rotation matrix representing a rotation of 90 degrees around the Z-axis
+    Eigen::Matrix3d rotation_matrix = Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+
+    // Create a translation vector
+    Eigen::Vector3d translation(1, 2, 3);
+
+    // Create an SE3d object representing the transformation
+    Sophus::SE3d se3(rotation_matrix, translation);
+
+    slam::Frame::Ptr a = slam::Frame::CreateFrame();
+    
+    a->SetPose(se3);
+
+    auto se3_returned = a->Pose();
+
+    ASSERT_EQ((se3_returned.inverse() * se3).log().norm(), 0);
+}

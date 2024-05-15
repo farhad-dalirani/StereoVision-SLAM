@@ -37,6 +37,9 @@ namespace slam
                   const cv::Mat &left_img, const cv::Mat &right_img);
             Frame& operator=(const Frame& other);
             
+            Sophus::SE3d Pose();
+            void SetPose(const Sophus::SE3d &pose);
+
             // Factory construction pattern, assigning IDs
             static Ptr CreateFrame();
             

@@ -7,6 +7,18 @@ namespace slam
           :id_(id), time_stamp_(time_stamp), pose_(pose), 
           left_img_(left_img), right_img_(right_img){}
 
+    Sophus::SE3d Frame::Pose()
+    {
+        std::unique_lock<std::mutex> lck(pose_mutex_);
+        return pose_;
+    }
+
+    void Frame::SetPose(const Sophus::SE3d &pose)
+    {
+        std::unique_lock<std::mutex> lck(pose_mutex_);
+        pose_ = pose;
+    }
+
     Frame::Ptr Frame::CreateFrame()
     {
         static long factory_id{0};
