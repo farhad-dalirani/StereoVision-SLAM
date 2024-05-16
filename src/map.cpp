@@ -139,5 +139,32 @@ namespace slam
         CleanMap();
     }
 
+
+    Map::LandmarksType Map::GetAllMapPoints()
+    {
+        std::unique_lock<std::mutex> lck(data_mutex_);
+        return landmarks_;
+    }
     
+    
+    Map::KeyframesType Map::GetAllKeyFrames()
+    {
+        std::unique_lock<std::mutex> lck(data_mutex_);
+        return keyframes_;
+    }
+
+
+    Map::LandmarksType Map::GetActiveMapPoints()
+    {
+        std::unique_lock<std::mutex> lck(data_mutex_);
+        return active_landmarks_;
+    }
+
+
+    Map::KeyframesType Map::GetActiveKeyFrames() 
+    {
+        std::unique_lock<std::mutex> lck(data_mutex_);
+        return active_keyframes_;
+    }
+
 }

@@ -27,6 +27,12 @@ namespace slam
             // Add/update a new point to the map
             void InsertMapPoint(MapPoint::Ptr map_point);
 
+            LandmarksType GetAllMapPoints();
+            KeyframesType GetAllKeyFrames();
+            LandmarksType GetActiveMapPoints();
+            KeyframesType GetActiveKeyFrames();
+            
+
         private:
             std::mutex data_mutex_;
             
