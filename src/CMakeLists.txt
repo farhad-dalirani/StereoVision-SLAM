@@ -1,7 +1,7 @@
 add_library(StereoVisionSLAM SHARED
         frame.cpp
         mappoint.cpp
-        #map.cpp
+        map.cpp
         camera.cpp
         #config.cpp
         feature.cpp

@@ -17,9 +17,16 @@ namespace slam
 
             Map(){}
 
-            
+            // Clean up the points with zero observations from active
+            // landmarks of the map
+            void CleanMap();
 
-        
+            // Add new keyframe
+            void InsertKeyFrame(Frame::Ptr frame);
+
+            // Add/update a new point to the map
+            void InsertMapPoint(MapPoint::Ptr map_point);
+
         private:
             std::mutex data_mutex_;
             
@@ -28,15 +35,18 @@ namespace slam
             // Active landmartks; Hashtable (id-landmark(map point))
             LandmarksType active_landmarks_;
             
-            // All key frames; Hashtable (id-frame)
+            // All key frames; Hashtable (id-keyframe)
             KeyframesType keyframes_;
-            // Active key frames; Hashtable (id-frame)
+            // Active key frames; Hashtable (id-keyframe)
             KeyframesType active_keyframes_;
 
             Frame::Ptr current_frame_ = nullptr;
 
-            // Hyper-parameter: number of active frames
+            // Hyper-parameter: number of active keyframes
             int num_active_keyframes_{7};
+
+            // Set old keyframes to inactive state
+            void RemoveOldKeyframe();
     };
 
 }

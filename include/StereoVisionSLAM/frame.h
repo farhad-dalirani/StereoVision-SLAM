@@ -28,9 +28,9 @@ namespace slam
             double time_stamp_;
 
             // Extracted features in left image
-            std::vector<std::shared_ptr<Feature>> feature_left_;
+            std::vector<Feature::Ptr> feature_left_;
             // Extracted features in right image, set to nullptr if no corresponding
-            std::vector<std::shared_ptr<Feature>> feature_right_;
+            std::vector<Feature::Ptr> feature_right_;
 
             Frame(){}
             Frame(long id, double time_stamp, const Sophus::SE3d &pose,
