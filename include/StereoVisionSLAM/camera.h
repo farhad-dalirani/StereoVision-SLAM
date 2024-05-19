@@ -14,14 +14,14 @@ namespace slam
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
             typedef std::shared_ptr<Camera> Ptr;
 
-            // camera intrinsic parameters
+            // Camera intrinsic parameters
             double fx_{0.0}, fy_{0.0}, cx_{0.0}, cy_{0.0};
 
-            // baseline of stereo system
+            // Baseline of stereo system
             double baseline_{0.0};
 
-            // extrinsic parameters: Transformations from coordinate of 
-            // reference camera of stereosystem to this camera coordinate system
+            // Extrinsic parameters: Transformations from the coordinate system
+            // of the reference camera in the stereosystem to this camera's coordinate system
             Sophus::SE3d pose_;
 
             // Transformations from this camera coordinate system

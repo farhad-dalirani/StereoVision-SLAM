@@ -5,7 +5,7 @@ add_library(StereoVisionSLAM SHARED
         camera.cpp
         config.cpp
         feature.cpp
-        #frontend.cpp
+        frontend.cpp
         #backend.cpp
         #viewer.cpp
         #visual_odometry.cpp

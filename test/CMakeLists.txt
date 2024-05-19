@@ -1,4 +1,4 @@
-SET(TEST_SOURCES test_frame test_feature test_dataset test_mappoint test_camera test_map test_config)
+SET(TEST_SOURCES test_frame test_feature test_dataset test_mappoint test_camera test_map test_config test_algorithm)
 
 FOREACH (test_src ${TEST_SOURCES})
     ADD_EXECUTABLE(${test_src} ${test_src}.cpp)

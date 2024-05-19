@@ -59,7 +59,7 @@ namespace slam
         // Find the nearest and farthest two active keyframes
         // to the current frame
         double max_dis{0}, min_dis{999999};
-        double max_kf_id{0}, min_kf_id{0};
+        unsigned long max_kf_id{0}, min_kf_id{0};
 
         // Transformation from camera coordinate system
         // to world coordinate system (map)
@@ -127,6 +127,8 @@ namespace slam
         {
             if (feat_ptr == nullptr) 
             {
+                // If a keypoint feature from the left camera is not tracked 
+                // in the right camera, the corresponding feature point will be null.
                 continue;
             }
             MapPoint::Ptr mp = feat_ptr->map_point_.lock();
