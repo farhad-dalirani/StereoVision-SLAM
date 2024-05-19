@@ -12,6 +12,11 @@ namespace slam
                               Eigen::Vector3d &pt_world)
     {
         /*
+        Gets n corresponding points in n cameras and the cameras' poses in the
+        stereo coordinate system, then calculates the 3D location of the points
+        in the stereo coordinate system.
+
+
         @param poses: pose of cameras in stereo vision system
         @param points: Corresponding points in the left and right 
                        camera normal planes.
