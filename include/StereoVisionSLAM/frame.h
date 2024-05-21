@@ -19,7 +19,8 @@ namespace slam
             // A frame is keyframe if tracked points be less 
             // than a threshold
             bool is_keyframe_{false};
-            // Tcw: Transformation from world to frame 
+            // Tcw: Transformation from world coordinate
+            // to left camera coordinate of this frame
             Sophus::SE3d pose_;
             // mutex for accessing pose
             std::mutex pose_mutex_;
