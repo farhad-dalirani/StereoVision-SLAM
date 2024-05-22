@@ -19,7 +19,7 @@ namespace slam
 
     int Frontend::DetectFeatures()
     {
-        // Detect keypoint features in current frame
+        // Detect keypoint features in current frame left image
 
         // If previously tracked keypoint are exist for the frame, 
         // masked them to explore new areas and ekypoints
@@ -48,14 +48,14 @@ namespace slam
 
     int Frontend::FindFeaturesInRight()
     {
-        // Use LK flow to track keypoint features from the  
-        // left image in the right image
+        /* Use LK flow to track keypoint features from the  
+          left image in the right image */
         
         std::vector<cv::Point2f> kps_left, kps_right;
         
-        // Prepare keypoint features in the left image. If there 
-        // are associated 3D points in the map with them, use their 
-        // projections into the right image as the initial guess
+        /* Prepare keypoint features in the left image. If there 
+          are associated 3D points in the map with them, use their 
+          projections into the right image as the initial guess */
         for(auto &feat_i: current_frame_->feature_left_)
         {
             kps_left.push_back(feat_i->position_.pt);
@@ -481,6 +481,64 @@ namespace slam
 
     }
 
+    void Frontend::SetObservationsForKeyFrame()
+    {
+        /* Link a landmark (3d point in map) to its corresponding keypoint
+           feature in current frame left camera */
+        for(auto &feat_i: current_frame_->feature_left_)
+        {
+            // Map point (landmark) that keypoint feature refers to
+            MapPoint::Ptr mp = feat_i->map_point_.lock();
+            if(mp)
+            {
+                // link landmark to keypoint feature
+                mp->AddObservation(feat_i);
+            }
+        } 
+    }
+
+    bool Frontend::InsertKeyframe()
+    {   
+        /* Determine if the current frame is a keyframe by examining the number 
+          of inlier tracked keypoint features from the left image of the last 
+          frame to the left image of the current frame. If it is a keyframe, 
+          detect new keypoint features to improve quality of feature set
+          and find their 3D map point correspondences by using triangulation 
+          with the right image of the current frame. */
+
+        /* If current frame does have enough good tracked keypoint
+           from last frame, it's not a keyframe */
+        if(tracking_inliers_ >= num_features_needed_for_keyframe_)
+        {
+            return false;
+        }
+
+        // Set current frame as keyframe and add it to map
+        current_frame_->SetKeyFrame();
+        map_->InsertKeyFrame(current_frame_);
+
+        std::cout << "Set frame " << current_frame_->id_ << " as keyframe "
+              << current_frame_->keyframe_id_ << std::endl;
+ 
+        SetObservationsForKeyFrame();
+
+        // Detect new keypoint features in current frame left image
+        DetectFeatures();
+        // Track in right image
+        FindFeaturesInRight();
+        // Triangulate track fetures in left and righ images 
+        TriangulateNewPoints();
+
+        // update backend because we have a new keyframe
+        // backend_->UpdateMap();
+        
+        if (viewer_)
+        {
+            viewer_->UpdateMap();
+        }
+
+        return true;
+    }
 
     void Frontend::SetMap(Map::Ptr map)
     {

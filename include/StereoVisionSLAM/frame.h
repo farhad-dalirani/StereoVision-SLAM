@@ -16,15 +16,15 @@ namespace slam
             unsigned long id_{0};
             // ID of key frame
             unsigned long keyframe_id_{0};
-            // A frame is keyframe if tracked points be less 
-            // than a threshold
+            /* A frame is keyframe if number of tracked points from last 
+            frame to current frame be less than a threshold */
             bool is_keyframe_{false};
-            // Tcw: Transformation from world coordinate
-            // to left camera coordinate of this frame
+            /* Tcw: Transformation from world coordinate
+             to left camera coordinate of this frame */
             Sophus::SE3d pose_;
-            // mutex for accessing pose
+            // Mutex for accessing pose
             std::mutex pose_mutex_;
-            // left and right images in stereo system
+            // Left and right images in stereo system
             cv::Mat left_img_, right_img_;
             double time_stamp_;
 
