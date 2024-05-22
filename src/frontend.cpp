@@ -540,6 +540,57 @@ namespace slam
         return true;
     }
 
+    bool Frontend::Track()
+    {
+        /* Tracks the current frame using the last frame, updates 
+           the current frame pose, tracking status, and checks for keyframes */
+
+        /* Assume relative pose between the last frame and current frame
+         equals to relative pose between last frame and its previous frame,
+         use this assumption to obtain an initial value for current frame pose */
+        if(last_frame_)
+        {
+            current_frame_->SetPose(relative_motion_ * last_frame_->Pose());
+        }
+
+        // Track keypoints features of last frame into current frame
+        int num_track_last = TrackLastFrame();
+        
+        // Estimate position of current frame in world coordinate
+        tracking_inliers_ = EstimateCurrentPose();
+
+        // Determine status of tracking
+        if (tracking_inliers_ > num_features_tracking_)
+        {
+            // Tracking good
+            status_ = FrontendStatus::TRACKING_GOOD;
+        }
+        else if (tracking_inliers_ > num_features_tracking_bad_) 
+        {
+            // Tracking bad
+            status_ = FrontendStatus::TRACKING_BAD;
+        } 
+        else 
+        {
+            // Lost
+            status_ = FrontendStatus::LOST;
+        }
+
+        // Check if current frame is keyframe
+        InsertKeyframe();
+
+        // Relative pose of current frame and last frame
+        relative_motion_ = current_frame_->Pose() * last_frame_->Pose().inverse();
+
+        if (viewer_) 
+        {
+            viewer_->AddCurrentFrame(current_frame_);
+        }
+
+        return true;
+    }
+
+
     void Frontend::SetMap(Map::Ptr map)
     {
         map_ = map;
