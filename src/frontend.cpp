@@ -590,6 +590,36 @@ namespace slam
         return true;
     }
 
+    bool Frontend::AddFrame(Frame::Ptr frame) 
+    {
+        // Update Frontend when a new frame comes
+
+        // Update curremt frame
+        current_frame_ = frame;
+
+        switch (status_) 
+        {
+            case FrontendStatus::INITING:
+                StereoInit();
+                break;
+            case FrontendStatus::TRACKING_GOOD:
+            case FrontendStatus::TRACKING_BAD:
+                Track();
+                break;
+            case FrontendStatus::LOST:
+                Reset();
+                break;
+        }
+
+        last_frame_ = current_frame_;
+        return true;
+    }
+
+    bool Frontend::Reset() 
+    {
+        std::cout << "Reset is not implemented. " << std::endl;
+        return true;
+    }
 
     void Frontend::SetMap(Map::Ptr map)
     {

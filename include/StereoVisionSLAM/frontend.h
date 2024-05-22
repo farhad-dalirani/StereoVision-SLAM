@@ -24,13 +24,9 @@ namespace slam
             typedef std::shared_ptr<Frontend> Ptr;
 
             Frontend();
-
             void SetMap(Map::Ptr map);
-
             void SetBackend(std::shared_ptr<Backend> backend);
-
             void SetViewer(std::shared_ptr<Viewer> viewer);
-            
             FrontendStatus GetStatus() const;
 
         private:
@@ -105,7 +101,14 @@ namespace slam
 
             // Determine if the current frame is a keyframe
             bool InsertKeyframe();
+            
+            // Tracks the current frame using the last frame
+            bool Track();
 
+            // Update Frontend when new frame
+            bool AddFrame(Frame::Ptr frame);
+
+            bool Reset();
     };
 
 
