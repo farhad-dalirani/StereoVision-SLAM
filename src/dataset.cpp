@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include "StereoVisionSLAM/slamexception.h"
 
 namespace slam
 {
@@ -11,7 +12,7 @@ namespace slam
     {
     }
 
-    void Dataset::initialize()
+    bool Dataset::initialize()
     {
         // Read camera intrinsic and extrinsic parameters
 
@@ -71,6 +72,8 @@ namespace slam
 
         fin.close();
         current_image_index_ = 0;
+        
+        return true;
     }
 
     Camera::Ptr Dataset::GetCamera(int camera_id) const

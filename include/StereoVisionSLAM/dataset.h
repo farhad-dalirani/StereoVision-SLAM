@@ -17,7 +17,7 @@ namespace slam
             Dataset(const std::string &dataset_path);
 
             // Read dataset information including cameras parameters
-            void initialize();
+            bool initialize();
 
             // Create and return next frame in sequence
             Frame::Ptr NextFrame();

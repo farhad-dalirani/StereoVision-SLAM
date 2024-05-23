@@ -8,7 +8,7 @@ add_library(StereoVisionSLAM SHARED
         frontend.cpp
         #backend.cpp
         viewer.cpp
-        #visual_odometry.cpp
+        visual_odometry.cpp
         dataset.cpp
         )
 

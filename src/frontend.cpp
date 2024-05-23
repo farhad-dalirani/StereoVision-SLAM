@@ -636,6 +636,12 @@ namespace slam
         viewer_ = viewer;
     }
 
+    void Frontend::SetCameras(Camera::Ptr left, Camera::Ptr right) 
+    {
+        camera_left_ = left;
+        camera_right_ = right;
+    }
+
     FrontendStatus Frontend::GetStatus() const
     {
         return status_;

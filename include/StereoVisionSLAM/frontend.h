@@ -19,6 +19,12 @@ namespace slam
 
     class Frontend
     {
+      /* The Frontend class is responsible for handling the front-end
+         operations of a Stereo Vision Simultaneous Localization and 
+         Mapping (SLAM) system. It manages the initialization, tracking, 
+         and frame processing tasks needed to build and maintain a sparse
+         map from stereo camera inputs. */
+
         public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
             typedef std::shared_ptr<Frontend> Ptr;
@@ -27,7 +33,10 @@ namespace slam
             void SetMap(Map::Ptr map);
             void SetBackend(std::shared_ptr<Backend> backend);
             void SetViewer(std::shared_ptr<Viewer> viewer);
+            void SetCameras(Camera::Ptr left, Camera::Ptr right);
             FrontendStatus GetStatus() const;
+            // Update Frontend when new frame
+            bool AddFrame(Frame::Ptr frame);
 
         private:
 
@@ -104,9 +113,6 @@ namespace slam
             
             // Tracks the current frame using the last frame
             bool Track();
-
-            // Update Frontend when new frame
-            bool AddFrame(Frame::Ptr frame);
 
             bool Reset();
     };
