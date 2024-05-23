@@ -21,9 +21,9 @@ namespace slam
 
     void MapPoint::AddObservation(Feature::Ptr feature)
     {
-        // Registers a 2D keypoint feature that correlates with
-        // this 3D point in the world coordinate system
-        // Ensures thread safety with a unique lock
+        /* Registers a 2D keypoint feature that correlates with
+         * this 3D point in the world coordinate system
+         * Ensures thread safety with a unique lock */
         std::unique_lock<std::mutex> lck(data_mutex_);
         observations_.push_back(feature);
         observed_times_++;

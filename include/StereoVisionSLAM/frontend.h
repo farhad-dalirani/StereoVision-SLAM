@@ -56,20 +56,20 @@ namespace slam
             std::shared_ptr<Viewer> viewer_{nullptr};
 
             /* The relative motion between the current frame and 
-              the previous frame, used to estimate the initial 
-              pose of the current frame. */
+             * the previous frame, used to estimate the initial 
+             * pose of the current frame. */
             Sophus::SE3d relative_motion_;
 
             /* Number of tracked features from last frame to current frame
-               that mark as inliers, it used to determine current frame is
-               keyframe or not */
+             * that mark as inliers, it used to determine current frame is
+             * keyframe or not */
             int tracking_inliers_{0};
 
             /* Maximum number of keypoint features to be extracted by
-               the keypoint feature detector */
+             * the keypoint feature detector */
             int num_features_{200};
             /* Minimum number of keypoint features required to initialize  
-               the frontend with a pair of left and right stereo images. */
+             * the frontend with a pair of left and right stereo images. */
             int num_features_init_{100};
             int num_features_tracking_{50};
             int num_features_tracking_bad_{20};
@@ -82,30 +82,30 @@ namespace slam
             int DetectFeatures();
 
             /* Track keypoint features from the left image in 
-               the right image using optical flow */
+             * the right image using optical flow */
             int FindFeaturesInRight();
 
             /* Generate initial map by triangulation of matching points
-               in the left and right camera image pair */
+             * in the left and right camera image pair */
             bool BuildInitMap();
 
             // Try to initialize frontend with stereo images
             bool StereoInit();
 
             /* Triangulate corresponding keypoint features in 
-             left and right images of current frame */
+             * left and right images of current frame */
             int TriangulateNewPoints();
 
             /* Track last frame left image features in current frame
-             left image */
+             * left image */
             int TrackLastFrame();
 
             /* Estimate current frame pose by utilizing tracked keypoint features
-               From last frame into current frame*/
+             * From last frame into current frame*/
             int EstimateCurrentPose();
 
             /* Link a landmark (3d point in map) to its corresponding keypoint
-            feature in current frame left camera */
+             * feature in current frame left camera */
             void SetObservationsForKeyFrame();
 
             // Determine if the current frame is a keyframe

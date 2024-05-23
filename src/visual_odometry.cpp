@@ -15,8 +15,8 @@ namespace slam
 
     bool VisualOdometry::initialize()
     {
-        /* Initialize different componets including dataset, map,
-           frontend, backend, viewer*/
+        /* Initialize different componets of Stereo SLAM pipeline
+         *  including dataset, map, frontend, backend, viewer */
 
         // Create config object from config file
         if(Config::SetParameterFile(config_file_path_) == false)
@@ -85,7 +85,7 @@ namespace slam
     void VisualOdometry::run()
     {
         /* Process whole input image sequece with 
-           stereo visual slam pipline */
+         *  stereo visual slam pipline */
 
         // Feed every frame of sequence to SLAM pipleline 
         while (true)

@@ -206,46 +206,46 @@ namespace slam
 
     int Frontend::TriangulateNewPoints()
     {
-        // Triangulate corresponding keypoint features in 
-        // left and right images of current frame
+        /* Triangulate corresponding keypoint features in 
+         * left and right images of current frame */
 
         // Retrieve left and right camera poses for triangulation
         std::vector<Sophus::SE3d> poses{camera_left_->pose(), camera_right_->pose()};
 
-        // Transformation from current frame coordinate system to
-        // world coordinate system (map coordinate system)
+        /* Transformation from current frame coordinate system to
+         * world coordinate system (map coordinate system) */
         Sophus::SE3d current_pose_Twc = current_frame_->Pose().inverse();
 
         int cnt_triangulated_pts{0};
         
-        // Triangulate each corresponding feature pair in 
-        // current frame left and right images
+        /* Triangulate each corresponding feature pair in 
+         * current frame left and right images */
         for(size_t i{0}; i < current_frame_->feature_left_.size(); i++)
         {
-            // Ignore ith feature in the left image if there is no corresponding   
-            // feature in the right image or if a 3D point is already 
-            // associated with it in the map.
+            /* Ignore ith feature in the left image if there is no corresponding   
+             * feature in the right image or if a 3D point is already 
+             * associated with it in the map. */
             if(current_frame_->feature_left_[i]->map_point_.expired() and 
                 current_frame_->feature_right_[i] != nullptr)
             {
-                // Convert keypoint features from camera pixel  
-                // into normal plane coordinate of each camera
+                /* Convert keypoint features from camera pixel  
+                 * into normal plane coordinate of each camera */
                 std::vector<Eigen::Vector3d> points{
                     camera_left_->pixel2camera(toVec2(current_frame_->feature_left_[i]->position_.pt))
                     ,
                     camera_right_->pixel2camera(toVec2(current_frame_->feature_right_[i]->position_.pt))
                 };
 
-                // Perfrom triangulation to obtain 3d location of point in 
-                // stereo system coordinate
+                /* Perfrom triangulation to obtain 3d location of point in 
+                 * stereo system coordinate */
                 Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
                 if(triangulation(poses, points, pworld) and (pworld[2] > 0))
                 {   
                     // Create a new map point by result of trangulation
                     MapPoint::Ptr new_map_point = MapPoint::CreateNewMappoint();
 
-                    // Transform 3d triangulated point from stereo system
-                    // coordinate to world coordinate system (map coordinate)
+                    /* Transform 3d triangulated point from stereo system
+                     * coordinate to world coordinate system (map coordinate) */
                     pworld = current_pose_Twc * pworld;
                     new_map_point->SetPos(pworld);
                     
@@ -268,12 +268,12 @@ namespace slam
 
     int Frontend::TrackLastFrame()
     {
-        // Track last frame left image features in current frame
-        // left image
+        /* Track last frame left image features in current frame
+         * left image */
 
-        // Retrieve keypoint features in the left image of the last frame.
-        // If 3D points are associated with these features, use their projections
-        // into the current frame as initial guesses for optical flow.
+        /* Retrieve keypoint features in the left image of the last frame.
+         * If 3D points are associated with these features, use their projections
+         * into the current frame as initial guesses for optical flow. */
         std::vector<cv::Point2f> kps_last, kps_current;
         for(Feature::Ptr &feat_i: last_frame_->feature_left_)
         {
@@ -293,8 +293,8 @@ namespace slam
             }
         }
         
-        // Track feature of last frame in current
-        // frame by using optical flow
+        /* Track feature of last frame in current
+         * frame by using optical flow */
         std::vector<uchar> status;
         cv::Mat error;
         cv::calcOpticalFlowPyrLK(
@@ -326,24 +326,24 @@ namespace slam
     int Frontend::EstimateCurrentPose()
     {
         /*
-        Utilizes tracked keypoint features from the last frame to estimate
-        the pose of the current frame in the world coordinate system
-        (map coordinate). It optimizes by minimizing the projection error
-        of landmarks and their corresponding tracked features. The optimization
-        process employs a coarse-to-fine hierarchical nonlinear optimization
-        approach, incorporating outlier detection in tracked points.
-        */
+         * Utilizes tracked keypoint features from the last frame to estimate
+         * the pose of the current frame in the world coordinate system
+         * (map coordinate). It optimizes by minimizing the projection error
+         * of landmarks and their corresponding tracked features. The optimization
+         * process employs a coarse-to-fine hierarchical nonlinear optimization
+         * approach, incorporating outlier detection in tracked points.
+         */
 
         /* A 6*3 block is used because the optimized parameters represent the
-         current frame's  pose as a 6D vector (Lie algebra: 3 for translation
-         + 3 for rotation), and the observations are 3D landmarks (map points).*/
+         * current frame's  pose as a 6D vector (Lie algebra: 3 for translation
+         * + 3 for rotation), and the observations are 3D landmarks (map points). */
         typedef g2o::BlockSolver_6_3 BlockSolverType;
         
         // Linear solver for solving linear subproblem during no-linear optimization
         typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType;
 
         /* Levenberg-Marquardt algorithm, which is used for nonlinear least squares optimization
-         Memory deallocation handled by optimizer*/
+         * Memory deallocation handled by optimizer */
         g2o::OptimizationAlgorithmLevenberg* solver = 
             new g2o::OptimizationAlgorithmLevenberg(
                 std::make_unique<BlockSolverType>(
@@ -354,7 +354,7 @@ namespace slam
         optimizer.setAlgorithm(solver);
 
         /* Optimization graph for obtaining the pose of the current frame
-           contains a single vertex */
+         * contains a single vertex */
         VertexPose *vertex_pose = new VertexPose(); // Memory deallocation handled by optimizer
         vertex_pose->setId(0);
         vertex_pose->setEstimate(current_frame_->Pose());
@@ -364,14 +364,14 @@ namespace slam
         Eigen::Matrix3d K = camera_left_->K();
 
         /* In the optimization graph, each keypoint feature in current frame
-           left camera with a corresponding 3D point in the map defines an edge*/
+         * left camera with a corresponding 3D point in the map defines an edge */
         int index{1};
         std::vector<EdgeProjectionPoseOnly *> edges;
         std::vector<Feature::Ptr> features;
         for (size_t i{0}; i < current_frame_->feature_left_.size(); ++i)
         {
             /* Retreive 3D map point (landmark) associated with the 
-               i'th keypoint feature in current frame's left camera */
+             *  i'th keypoint feature in current frame's left camera */
             MapPoint::Ptr mp = current_frame_->feature_left_[i]->map_point_.lock();
             if(mp)
             {
@@ -388,7 +388,7 @@ namespace slam
                 edge->setMeasurement(toVec2(current_frame_->feature_left_[i]->position_.pt));
 
                 /* Set information matrix, it is the inverse of the covariance 
-                 and indicates the confidence in the measurement*/
+                 * and indicates the confidence in the measurement*/
                 edge->setInformation(Eigen::Matrix2d::Identity());
 
                 // Kernel to decrease effect of outliers
@@ -409,8 +409,8 @@ namespace slam
         const double chi2_th{5.991};
 
         /* Estimate the pose and determine the outliers Perform
-         the whole optimization 4 times, each time detected 
-         outliers will result in a potential better solution*/ 
+         * the whole optimization 4 times, each time detected 
+         * outliers will result in a potential better solution */ 
         for(int iteration{0}; iteration < 4; ++iteration)
         {
             // initialize parameters
@@ -422,8 +422,8 @@ namespace slam
             cnt_outlier = 0;
 
             /* Count the outliers and accoding to outlier status
-             of a edge, assign different level prority to edges
-             for coarse-to-fine heirarchical optimization*/
+             * of a edge, assign different level prority to edges
+             * for coarse-to-fine heirarchical optimization*/
             for(size_t i{0}; i < edges.size(); ++i)
             {
                 auto e =edges[i];
@@ -450,7 +450,7 @@ namespace slam
                 if(iteration == 2)
                 {
                     /* Remove robust kernel for more aggressive
-                     optimization for the last iteration*/
+                     * optimization for the last iteration */
                     e->setRobustKernel(nullptr);
                 }
 
@@ -466,7 +466,7 @@ namespace slam
         std::cout << "Current Pose = \n" << current_frame_->Pose().matrix() << std::endl;
 
         /* Remove links between landmarks (3D points in the map) 
-         and features that are outliers*/
+         * and features that are outliers */
         for (auto &feat : features) 
         {
             if (feat->outlier_) 
@@ -484,7 +484,7 @@ namespace slam
     void Frontend::SetObservationsForKeyFrame()
     {
         /* Link a landmark (3d point in map) to its corresponding keypoint
-           feature in current frame left camera */
+         * feature in current frame left camera */
         for(auto &feat_i: current_frame_->feature_left_)
         {
             // Map point (landmark) that keypoint feature refers to
@@ -500,14 +500,14 @@ namespace slam
     bool Frontend::InsertKeyframe()
     {   
         /* Determine if the current frame is a keyframe by examining the number 
-          of inlier tracked keypoint features from the left image of the last 
-          frame to the left image of the current frame. If it is a keyframe, 
-          detect new keypoint features to improve quality of feature set
-          and find their 3D map point correspondences by using triangulation 
-          with the right image of the current frame. */
+         * of inlier tracked keypoint features from the left image of the last 
+         * frame to the left image of the current frame. If it is a keyframe, 
+         * detect new keypoint features to improve quality of feature set
+         * and find their 3D map point correspondences by using triangulation 
+         * with the right image of the current frame. */
 
         /* If current frame does have enough good tracked keypoint
-           from last frame, it's not a keyframe */
+         * from last frame, it's not a keyframe */
         if(tracking_inliers_ >= num_features_needed_for_keyframe_)
         {
             return false;
@@ -543,11 +543,11 @@ namespace slam
     bool Frontend::Track()
     {
         /* Tracks the current frame using the last frame, updates 
-           the current frame pose, tracking status, and checks for keyframes */
+         * the current frame pose, tracking status, and checks for keyframes */
 
         /* Assume relative pose between the last frame and current frame
-         equals to relative pose between last frame and its previous frame,
-         use this assumption to obtain an initial value for current frame pose */
+         * equals to relative pose between last frame and its previous frame,
+         * use this assumption to obtain an initial value for current frame pose */
         if(last_frame_)
         {
             current_frame_->SetPose(relative_motion_ * last_frame_->Pose());

@@ -12,8 +12,9 @@
 #include <list>
 #include <unistd.h> 
 
-// Eigen Library for for linear algebra,
-// matrix and vector operations, geometrical transformations, ...
+/* Eigen Library for for linear algebra,
+ * matrix and vector operations, geometrical 
+ * transformations, ... */
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 

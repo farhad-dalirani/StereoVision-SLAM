@@ -17,10 +17,9 @@
 
 namespace slam
 {
-    /*
-        Definitions of custom vertices and edges for g2o graph-based 
-        non-linear optimization used in the frontend and backend.
-    */
+    /* Definitions of custom vertices and edges for g2o graph-based 
+     * non-linear optimization used in the frontend and backend.
+     */
 
     class VertexPose: public g2o::BaseVertex<6, Sophus::SE3d>
     {
@@ -38,22 +37,22 @@ namespace slam
             virtual void oplusImpl(const double *update) override
             {
                 /* 
-                Update parameters according to the calculated update value.
+                 * Update parameters according to the calculated update value.
 
-                This involves left multiplication on SE(3) (Left Perturbation).
+                 * This involves left multiplication on SE(3) (Left Perturbation).
                 
-                Refer to section 3.3.5 [Derivative on SE(3)] in the book
-                "Introduction to Visual SLAM: From Theory to Practice" 
-                by Xiang Gao and Tao Zhang.
-                */
+                 * Refer to section 3.3.5 [Derivative on SE(3)] in the book
+                 * "Introduction to Visual SLAM: From Theory to Practice" 
+                 * by Xiang Gao and Tao Zhang.
+                 */
                 
                 // Convert double array to Eigen vector
                 Eigen::Matrix<double, 6, 1> update_vec;
                 update_vec <<  update[0], update[1], update[2], update[3], update[4], update[5];
 
-                // Convert the update vector from its Lie algebra representation 
-                // to a Lie group (transformation matrix), and then left multiply it 
-                // with the current estimate of the parameters.
+                /* Convert the update vector from its Lie algebra representation 
+                 * to a Lie group (transformation matrix), and then left multiply it 
+                 * with the current estimate of the parameters. */
                 _estimate = Sophus::SE3d::exp(update_vec) * _estimate;
             }
 
@@ -92,8 +91,8 @@ namespace slam
                 const VertexPose *v = static_cast<VertexPose *>(_vertices[0]);
                 Sophus::SE3d T = v->estimate();
                 
-                // Project landmark from world coordinate to 
-                // current frame left image
+                /* Project landmark from world coordinate to 
+                 * current frame left image */
                 Eigen::Vector3d pos_pixel = _K * (T * _pos3d);
                 pos_pixel /= pos_pixel[2];
 
@@ -103,20 +102,20 @@ namespace slam
 
             virtual void linearizeOplus() override 
             {
-                // Computes the Jacobian of the error function
-                // with respect to parameters (pose vector)
-                //
-                // Gradient calculation similar to
-                // 6.7.3 [Solve PnP by Minimizing the Reprojection Error]
-                // in the book "Introduction to Visual SLAM: From Theory to Practice" 
-                // by Xiang Gao and Tao Zhang.
+                /* Computes the Jacobian of the error function
+                 * with respect to parameters (pose vector)
+                 *
+                 * Gradient calculation similar to
+                 * 6.7.3 [Solve PnP by Minimizing the Reprojection Error]
+                 * in the book "Introduction to Visual SLAM: From Theory to Practice" 
+                 * by Xiang Gao and Tao Zhang. */
 
                 // Obtain current estimate of parameters (pose of current frame)
                 const VertexPose *v = static_cast<VertexPose *>(_vertices[0]);
                 Sophus::SE3d T = v->estimate();
 
-                // Convert 3D point from world coordinate
-                // to left camera coordinate
+                /* Convert 3D point from world coordinate
+                 * to left camera coordinate */
                 Eigen::Vector3d pos_cam = T * _pos3d;
 
                 double fx = _K(0, 0);

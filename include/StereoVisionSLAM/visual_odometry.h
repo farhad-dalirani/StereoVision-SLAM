@@ -13,6 +13,8 @@ namespace slam
 
     class VisualOdometry
     {
+        /* Stereo Visual SLAM pipeline */
+
         public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
             typedef std::shared_ptr<VisualOdometry> Ptr;

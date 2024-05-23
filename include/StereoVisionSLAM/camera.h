@@ -20,12 +20,13 @@ namespace slam
             // Baseline of stereo system
             double baseline_{0.0};
 
-            // Extrinsic parameters: Transformations from the coordinate system
-            // of the reference camera in the stereosystem to this camera's coordinate system
+            /* Extrinsic parameters: Transformations from the coordinate system
+             * of the reference camera in the stereosystem to this camera's 
+             * coordinate system */
             Sophus::SE3d pose_;
 
-            // Transformations from this camera coordinate system
-            // to coordinate of reference camera of the stereo vision system
+            /* Transformations from this camera coordinate system
+             * to coordinate of reference camera of the stereo vision system */
             Sophus::SE3d pose_inv_;
 
 

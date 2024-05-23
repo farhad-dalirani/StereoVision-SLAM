@@ -5,8 +5,8 @@ namespace slam
 
     void Map::CleanMap()
     {
-        // Clean up the points with zero observations from 
-        // active landmarks of the map
+        /* Clean up the points with zero observations from 
+         * active landmarks of the map */
 
         int cnt_removed_active_lan{0};
         for(auto iter{active_landmarks_.begin()}; iter != active_landmarks_.end();)
@@ -32,8 +32,8 @@ namespace slam
         keyframes_[frame->keyframe_id_] = frame;
         active_keyframes_[frame->keyframe_id_] = frame;
 
-        // if number of active keyframes are larger that the specified
-        // value, remove one of them
+        /* if number of active keyframes are larger that the specified
+         * value, remove one of them */
         if(active_keyframes_.size() > num_active_keyframes_)
         {
             RemoveOldKeyframe();
@@ -56,13 +56,13 @@ namespace slam
             return;
         }
 
-        // Find the nearest and farthest two active keyframes
-        // to the current frame
+        /* Find the nearest and farthest two active keyframes
+         * to the current frame */
         double max_dis{0}, min_dis{999999};
         unsigned long max_kf_id{0}, min_kf_id{0};
 
-        // Transformation from camera coordinate system
-        // to world coordinate system (map)
+        /* Transformation from camera coordinate system
+         * to world coordinate system (map) */
         Sophus::SE3d Twc = current_frame_->Pose().inverse();
 
         for(const auto &kf: active_keyframes_)
@@ -73,12 +73,12 @@ namespace slam
                 continue;
             }
 
-            // Calculates the distance between frames. First, the 
-            // transformation between two frames is calculated. Then,
-            // the vector representation of the transformation matrix 
-            // in Lie algebra is computed by taking the log. Finally,
-            // the norm of the transformation vector is used to quantify 
-            // the distance between the frames.
+            /* Calculates the distance between frames. First, the 
+             * transformation between two frames is calculated. Then,
+             * the vector representation of the transformation matrix 
+             * in Lie algebra is computed by taking the log. Finally,
+             * the norm of the transformation vector is used to quantify 
+             * the distance between the frames. */
             double dis = (kf.second->Pose() * Twc).log().norm();
 
             if (dis > max_dis)
@@ -96,9 +96,9 @@ namespace slam
         // hyper-parameter
         const double min_dis_th{0.2};
         Frame::Ptr frame_to_remove{nullptr};
-        // if closest active frame to the current active keyframe
-        // is so similar in pose, remove it, otherwise remove the 
-        // active keyframe with largest pose difference
+        /* if closest active frame to the current active keyframe
+         * is so similar in pose, remove it, otherwise remove the 
+         * active keyframe with largest pose difference */
         if(min_dis < min_dis_th)
         {
             frame_to_remove = active_keyframes_.at(min_kf_id);
@@ -113,8 +113,8 @@ namespace slam
         // remove keyframe from active key frames
         active_keyframes_.erase(frame_to_remove->keyframe_id_);
 
-        // remove links between map points(landmarks) and keypoints features
-        // of removed key frame 
+        /* remove links between map points(landmarks) and keypoints features
+         * of removed key frame */
         for(auto feat_ptr: frame_to_remove->feature_left_)
         {
             MapPoint::Ptr mp = feat_ptr->map_point_.lock();
@@ -127,8 +127,8 @@ namespace slam
         {
             if (feat_ptr == nullptr) 
             {
-                // If a keypoint feature from the left camera is not tracked 
-                // in the right camera, the corresponding feature point will be null.
+                /* If a keypoint feature from the left camera is not tracked 
+                 * in the right camera, the corresponding feature point will be null. */
                 continue;
             }
             MapPoint::Ptr mp = feat_ptr->map_point_.lock();

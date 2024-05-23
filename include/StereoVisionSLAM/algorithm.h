@@ -74,9 +74,9 @@ namespace slam
         auto svd = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
         pt_world = (svd.matrixV().col(3) / svd.matrixV()(3, 3)).head<3>();
 
-        // In perfect situation third sigular value is zero. However, due to
-        // noise it should be near zero and much smaller than second sigular 
-        // value.
+        /* In perfect situation third sigular value is zero. However, due to
+         * noise it should be near zero and much smaller than second sigular 
+         * value. */
         if (svd.singularValues()[3] / svd.singularValues()[2] < 1e-2) 
         {   
             // Calculation good, keep it

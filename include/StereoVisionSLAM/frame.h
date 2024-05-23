@@ -17,10 +17,10 @@ namespace slam
             // ID of key frame
             unsigned long keyframe_id_{0};
             /* A frame is keyframe if number of tracked points from last 
-            frame to current frame be less than a threshold */
+             * frame to current frame be less than a threshold */
             bool is_keyframe_{false};
             /* Tcw: Transformation from world coordinate
-             to left camera coordinate of this frame */
+             * to left camera coordinate of this frame */
             Sophus::SE3d pose_;
             // Mutex for accessing pose
             std::mutex pose_mutex_;
