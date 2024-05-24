@@ -11,6 +11,9 @@
 #include <mutex>
 #include <list>
 #include <unistd.h> 
+#include <thread>
+#include <condition_variable>
+#include <atomic>
 
 /* Eigen Library for for linear algebra,
  * matrix and vector operations, geometrical 

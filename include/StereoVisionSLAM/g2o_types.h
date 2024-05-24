@@ -23,8 +23,10 @@ namespace slam
 
     class VertexPose: public g2o::BaseVertex<6, Sophus::SE3d>
     {
-        // Pose vertex (6D pose vector in lie algebra 3 rotation + 3 translation)
-        
+        /* Custom G2O Vertex for representing Pose (6D pose 
+         * vector in lie algebra 3 rotation + 3 translation)
+         * in optimization graph */
+                
         public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
@@ -61,6 +63,32 @@ namespace slam
             virtual bool write(std::ostream &out) const override { return true; }
     };
 
+    class VertexXYZ: public g2o::BaseVertex<3, Eigen::Vector3d>
+    {
+        /* Custom G2O Vertex for representing landmark (3D map point)
+         * in optimization graph */
+
+        public:
+            EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
+            virtual void setToOriginImpl() override
+            {
+                // reset landmark to default value
+                _estimate = Eigen::Vector3d::Zero(); 
+            }
+
+            virtual void oplusImpl(const double *update) override
+            {
+                // Update verterx paramters with update value
+                _estimate[0] += update[0];
+                _estimate[1] += update[1];
+                _estimate[2] += update[2];
+            }
+
+            // For file read and write, not implemented
+            virtual bool read(std::istream &in) override { return true; }
+            virtual bool write(std::ostream &out) const override { return true; }
+    };
 
     class EdgeProjectionPoseOnly : public g2o::BaseUnaryEdge<2, Eigen::Vector2d, VertexPose>
     {
@@ -144,6 +172,99 @@ namespace slam
             Eigen::Matrix3d _K;
     };
 
+    class EdgeProjection: public g2o::BaseBinaryEdge<2, Eigen::Vector2d, VertexPose, VertexXYZ>
+    {
+        /*
+            Edge definition for the g2o graph, used for optimizing the active frames'
+            poses and landmarks' locations in the backend stage.
+            
+            This class represents an edge in a graph optimization problem that uses
+            the projection of a 3D point onto current frame left camera 2D image plane.
+             
+            The difference between the projection of the 3D point and its
+            corresponding 2D keypoint feature is used to calculate the error
+            of the estimated parameters (pose of active keyframes and location
+            of active landmarks).
+        */
+
+
+        public:
+            EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+
+            EdgeProjection(const Eigen::Matrix3d &K, const Sophus::SE3d &cam_ext)
+            : _K(K), _cam_ext(cam_ext)
+            {
+            }
+
+            virtual void computeError() override
+            {
+                // Landmark vertex of edge
+                const VertexPose *v0 = static_cast<VertexPose *>(_vertices[0]);
+                // Frame pose vertex of edge
+                const VertexXYZ *v1 = static_cast<VertexXYZ *>(_vertices[1]);
+
+                // Retreive estimated value for pose of frame
+                Sophus::SE3d T = v0->estimate();
+
+                // Project estimated position of landmark to the camera image
+                Eigen::Vector3d pos_pixel = _K * (_cam_ext * (T * v1->estimate()));
+                pos_pixel /= pos_pixel[2];
+
+                // Calculate error of projected point and its corresponding 2D feature
+                _error = _measurement - pos_pixel.head<2>();
+            }
+
+            virtual void linearizeOplus() override
+            {
+                /* Computes the Jacobian of the error function
+                 * with respect to parameters (frame pose and landmark position)
+                 *
+                 * Gradient calculation similar to
+                 * 6.7.3 [Solve PnP by Minimizing the Reprojection Error]
+                 * in the book "Introduction to Visual SLAM: From Theory to Practice" 
+                 * by Xiang Gao and Tao Zhang.
+                 * */
+                
+                // Retreive estimated frame pose and landmark position
+                const VertexPose *v0 = static_cast<VertexPose *>(_vertices[0]);
+                const VertexXYZ *v1 = static_cast<VertexXYZ *>(_vertices[1]);
+                Sophus::SE3d T = v0->estimate();
+                Eigen::Vector3d pw = v1->estimate();
+
+                Eigen::Vector3d pos_cam = _cam_ext * T * pw;
+
+                // Camera intrinsic parameters
+                double fx = _K(0, 0);
+                double fy = _K(1, 1);
+                double X = pos_cam[0];
+                double Y = pos_cam[1];
+                double Z = pos_cam[2];
+                double Zinv = 1.0 / (Z + 1e-18);
+                double Zinv2 = Zinv * Zinv;
+                
+                // Derivative with respect to frame pose
+                _jacobianOplusXi << -fx * Zinv, 0, fx * X * Zinv2, fx * X * Y * Zinv2,
+                                    -fx - fx * X * X * Zinv2, fx * Y * Zinv, 0, -fy * Zinv,
+                                    fy * Y * Zinv2, fy + fy * Y * Y * Zinv2, -fy * X * Y * Zinv2,
+                                    -fy * X * Zinv;
+                // Derivative with respect to landmark position
+                _jacobianOplusXj = _jacobianOplusXi.block<2, 3>(0, 0) *
+                           _cam_ext.rotationMatrix() * T.rotationMatrix();
+
+            }
+            
+            // For reading and writing into file, not implemented
+            virtual bool read(std::istream &in) override { return true; }
+            virtual bool write(std::ostream &out) const override { return true; }
+
+        private:
+            // Camera Intrinsic Parameters
+            Eigen::Matrix3d _K;
+            /* Extrinsic parameters: Transformations from the coordinate system
+             * of the reference camera in the stereosystem to this camera's 
+             * coordinate system */
+            Sophus::SE3d _cam_ext;
+    };
 
 }
 

@@ -16,17 +16,17 @@ namespace slam
     {
         // Read camera intrinsic and extrinsic parameters
 
-        // Open file that contain 3*4 projection matrix
-        // of each camera in KITTI dataset
+        /* Open file that contain 3*4 projection matrix
+         * of each camera in KITTI dataset */
         std::ifstream fin(dataset_path_ + "/calib.txt");
         if(!fin)
         {
             throw SLAMException("Cannot open KITTI camera parameters file (calib.txt).");
         }
 
-        // There are four cameras in the KITTI dataset stereo vision system.
-        // 0, 1: left and right monocular cameras
-        // 2, 3: left and right color cameras
+        /* There are four cameras in the KITTI dataset stereo vision system.
+         * 0, 1: left and right monocular cameras
+         * 2, 3: left and right color cameras */
         for(int i{0}; i<4; ++i)
         {
             char cam_name[3];
@@ -40,9 +40,9 @@ namespace slam
                 fin >> pr_mat[j];
             }
 
-            // Since images are rectified in the KITTI dataset,
-            // the projection matrix general form from K[R|t] simplifies
-            // to K[I|t] or [K|Kt].
+            /* Since images are rectified in the KITTI dataset,
+             * the projection matrix general form from K[R|t] simplifies
+             * to K[I|t] or [K|Kt]. */
             
             // Read camera instrinsic matrix
             Eigen::Matrix3d K;
@@ -55,12 +55,12 @@ namespace slam
             t << pr_mat[3], pr_mat[7], pr_mat[11];
             t = K.inverse() * t;
 
-            // baseline between i'th camera and reference camera
-            // in stereo vision system
+            /* baseline between i'th camera and reference camera
+             * in stereo vision system */
             double baseline{t.norm()};
 
-            // Adopt K since we use down-sampled version of KITTI images
-            // with factor of two
+            /* Adopt K since we use down-sampled version of KITTI images
+             * with factor of two */
             K *= 0.5;
 
             Camera::Ptr new_camera = std::make_shared<Camera>(
