@@ -36,6 +36,10 @@ namespace slam
             
             void SetPos(const Eigen::Vector3d &pos);
             
+            /* Get 2d keypoint features associated to the map point 
+             * across different frames */
+            std::list<std::weak_ptr<Feature>> GetObs(); 
+
             void AddObservation(Feature::Ptr feature);
 
             void RemoveObservation(Feature::Ptr feature);

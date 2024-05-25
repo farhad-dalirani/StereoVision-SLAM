@@ -16,7 +16,7 @@ namespace slam
     bool VisualOdometry::initialize()
     {
         /* Initialize different componets of Stereo SLAM pipeline
-         *  including dataset, map, frontend, backend, viewer */
+         * including dataset, map, frontend, backend, viewer */
 
         // Create config object from config file
         if(Config::SetParameterFile(config_file_path_) == false)
@@ -40,16 +40,17 @@ namespace slam
         
         // Create components
         frontend_ = std::make_shared<Frontend>();
-        //backend_ = std::shared_ptr<Backend>();
+        backend_ = std::make_shared<Backend>();
         map_ = std::make_shared<Map>();
         viewer_ = std::make_shared<Viewer>();
 
-        //frontend_->SetBackend(backend_);
+        frontend_->SetBackend(backend_);
         frontend_->SetMap(map_);
         frontend_->SetViewer(viewer_);
         frontend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
-        // backend_->SetMap(map_);
-        // backend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+        
+        backend_->SetMap(map_);
+        backend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
 
 
         viewer_->SetMap(map_);
@@ -100,7 +101,7 @@ namespace slam
         }
         
         // Stop other components
-        // backend_->Stop();
+        backend_->Stop();
         viewer_->Close();
 
         std::cout << "VO exit" << std::endl;

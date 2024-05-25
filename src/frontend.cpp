@@ -163,8 +163,8 @@ namespace slam
         current_frame_->SetKeyFrame();
         map_->InsertKeyFrame(current_frame_);
 
-        // **
-        // backend_->UpdateMap();
+        // Signal for performing backend optimization (boundle adjustment)
+        backend_->UpdateMap();
 
         std::cout << "Initial map created with " << cnt_init_landmarks << " map points" << std::endl;
 
@@ -530,7 +530,7 @@ namespace slam
         TriangulateNewPoints();
 
         // update backend because we have a new keyframe
-        // backend_->UpdateMap();
+        backend_->UpdateMap();
         
         if (viewer_)
         {

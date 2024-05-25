@@ -1,6 +1,6 @@
 %YAML:1.0
 
-dataset_dir: /data/KITTI-visual-odometry-dataset/sequences/05
+dataset_dir: ./data/dataset/sequences/05
 
 # camera intrinsics
 camera.fx: 517.3

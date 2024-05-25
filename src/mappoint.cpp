@@ -46,6 +46,14 @@ namespace slam
             } 
         }
     }
+    
+    std::list<std::weak_ptr<Feature>> MapPoint::GetObs()
+    {
+        /* Get 2d keypoint features associated to the map point 
+         * across different frames */
+        std::unique_lock<std::mutex> lck(data_mutex_);
+        return observations_;
+    } 
 
     MapPoint::Ptr MapPoint::CreateNewMappoint()
     {

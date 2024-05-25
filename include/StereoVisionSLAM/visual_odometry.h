@@ -5,6 +5,7 @@
 #include "StereoVisionSLAM/common_include.h"
 #include "StereoVisionSLAM/dataset.h"
 #include "StereoVisionSLAM/frontend.h"
+#include "StereoVisionSLAM/backend.h"
 #include "StereoVisionSLAM/viewer.h"
 #include "StereoVisionSLAM/map.h"
 
@@ -37,7 +38,7 @@ namespace slam
             bool inited_{false};
             std::string config_file_path_;
             Frontend::Ptr frontend_{nullptr};
-            //std::shared_ptr<Backend> backend_{nullptr};
+            std::shared_ptr<Backend> backend_{nullptr};
             Map::Ptr map_{nullptr};
             Viewer::Ptr viewer_{nullptr};
             Dataset::Ptr dataset_{nullptr};

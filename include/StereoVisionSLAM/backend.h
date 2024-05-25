@@ -16,25 +16,40 @@ namespace slam
         /** 
          * Backend has a separate optimization thread, which starts
          * optimization when the Map is updated. Map updates are triggered
-         * by the frontend
+         * by the frontend. It optimizes active keyframes and active map points.
          */
         
         public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
             typedef std::shared_ptr<Backend> Ptr;
 
+            // Initialize backend optimization in a seprate thread
             Backend();
+            // Signal for one backend optimization
+            void UpdateMap();
+            // Close backend optimization
+            void Stop(); 
+
+            void SetMap(std::shared_ptr<Map> map);
+            void SetCameras(Camera::Ptr left, Camera::Ptr right);
+
 
         private:
             Map::Ptr map_;
             std::thread backend_thread_;
             std::mutex data_mutex_;
             
-            std::condition_variable map_update;
+            std::condition_variable map_update_;
             std::atomic<bool> backend_running_;
             
             Camera::Ptr cam_left_{nullptr};
             Camera::Ptr cam_right_{nullptr};
+
+            // Refine pose of given keyframes and landmarks (bundle adjustment)
+            void Optimize(Map::KeyframesType &keyframes, Map::LandmarksType &landmarks); 
+            /* Waits for a signal to run the backend optimization on
+             * active keyframes and active landmarks */
+            void BackendLoop();
     };
 
 }

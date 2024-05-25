@@ -6,6 +6,7 @@
 #include<StereoVisionSLAM/frame.h>
 #include<StereoVisionSLAM/map.h>
 #include<StereoVisionSLAM/camera.h>
+#include<StereoVisionSLAM/backend.h>
 #include<StereoVisionSLAM/viewer.h>
 #include <opencv2/features2d.hpp>
 
