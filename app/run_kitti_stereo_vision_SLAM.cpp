@@ -1,13 +1,15 @@
-#include<StereoVisionSLAM/common_include.h>
-#include<StereoVisionSLAM/camera.h>
-#include<StereoVisionSLAM/dataset.h>
+#include "StereoVisionSLAM/visual_odometry.h"
 
-int main()
+int main(int argc, char **argv) 
 {
-    std::string dataset_path_str{"./data/dataset/sequences/00"};
-    slam::Dataset ds(dataset_path_str);
-
-    ds.initialize();
+    
+    std::string config_file_path = "./config/default.yaml";
+    
+    slam::VisualOdometry::Ptr vo = std::make_shared<slam::VisualOdometry>(config_file_path);
+    
+    assert(vo->initialize() == true);
+    
+    vo->run();
 
     return 0;
 }
