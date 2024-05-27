@@ -54,6 +54,7 @@ namespace slam
 
 
         viewer_->SetMap(map_);
+        viewer_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
 
         return true;
     }

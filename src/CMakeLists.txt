@@ -1,4 +1,4 @@
-add_library(StereoVisionSLAM SHARED
+add_library(StereoVisionSLAM 
         frame.cpp
         mappoint.cpp
         map.cpp

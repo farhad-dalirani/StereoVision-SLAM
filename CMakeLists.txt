@@ -43,6 +43,12 @@ include_directories(${CSPARSE_INCLUDE_DIR})
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
+# rerun
+include(FetchContent)
+FetchContent_Declare(rerun_sdk URL
+    https://github.com/rerun-io/rerun/releases/latest/download/rerun_cpp_sdk.zip)
+FetchContent_MakeAvailable(rerun_sdk)
+
 SET(G2O_LIBS g2o_csparse_extension g2o_stuff g2o_core g2o_types_slam3d g2o_solver_csparse)
 
 set(THIRD_PARTY_LIBS
@@ -53,6 +59,7 @@ set(THIRD_PARTY_LIBS
         pthread
         ${CSPARSE_LIBRARY}
         ${GTEST_BOTH_LIBRARIES}
+        rerun_sdk
         )
 
 
