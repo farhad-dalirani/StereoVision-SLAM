@@ -20,6 +20,15 @@ namespace slam
     Viewer::Viewer() 
     {
         rec.spawn().exit_on_failure();
+
+        // World orgin
+        rec.log_static("world", rerun::ViewCoordinates::RIGHT_HAND_Z_UP); // Set an up-axis
+        rec.log_static(
+            "world",
+            rerun::Arrows3D::from_vectors({{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
+            ).with_colors({{255, 0, 0}, {0, 255, 0}, {0, 0, 255}})
+        );
+
     }
 
     void Viewer::Close() 
@@ -41,19 +50,61 @@ namespace slam
         active_keyframes_ = map_->GetActiveKeyFrames();
         active_landmarks_ = map_->GetActiveMapPoints();
 
-        // Obtain most recent active keyframe id
-        unsigned long max_keyframe_id_{0};
-        for(auto iter{active_keyframes_.begin()}; iter != active_keyframes_.end(); iter++)
+        // Oreder keyframes id in decreasing order
+        std::vector<std::pair<unsigned long, Frame::Ptr>> kf_sort{active_keyframes_.begin(), active_keyframes_.end()};
+        std::sort(kf_sort.begin(), kf_sort.end(), 
+                [](std::pair<unsigned long, Frame::Ptr> &a, std::pair<unsigned long, Frame::Ptr> &b)
+                    {return a.first > b.first;});
+
+        // Use most recent active keyframe id as sequence number for visualization
+        rec.set_time_sequence("max_keyframe_id", kf_sort[0].first);
+
+        // Draw all active keyframes
+        for(size_t i{0}; i < kf_sort.size(); ++i)
         {
-            if (iter->second->keyframe_id_ > max_keyframe_id_)
+            std::string entity_name = std::string("world/stereosys")+ std::to_string(i) + std::string("/cam_left");
+            
+            if (i != 0)
             {
-                max_keyframe_id_ = iter->second->keyframe_id_;
+                Sophus::SE3d Twc0 = kf_sort[0].second->pose_.inverse() * camera_left_->pose_inv_;
+                Sophus::SE3d Twci = kf_sort[i].second->pose_.inverse() * camera_left_->pose_inv_;
+                Sophus::SE3d Tcic0 = Twci.inverse() * Twc0;
+                const Eigen::Vector3f camera_position = Tcic0.translation().cast<float>();
+                Eigen::Matrix3f camera_orientation = Tcic0.rotationMatrix().cast<float>();
+                rec.log(entity_name,
+                        rerun::Transform3D(
+                            rerun::Vec3D(camera_position.data()),
+                            rerun::Mat3x3(camera_orientation.data()), true)
+                    );
+            }
+
+            // Left camera pinwhole model
+            float fx{camera_left_->fx_};
+            float fy{camera_left_->fy_};
+            float img_num_rows{kf_sort[i].second->left_img_.rows};
+            float img_num_cols{kf_sort[i].second->left_img_.cols};
+            rec.log(entity_name,
+                    rerun::Pinhole::from_focal_length_and_resolution({fx, fy}, {img_num_cols, img_num_rows}));
+
+
+            // Draw stereo images of newest keyframe
+            if(i == 0)
+            {        
+                rec.log(entity_name, 
+                        rerun::Image(tensor_shape(kf_sort[i].second->left_img_), 
+                                    rerun::TensorBuffer::u8(kf_sort[i].second->left_img_)));
             }
         }
 
-        // // Use most recent active keyframe id as sequence number for visualization
-        rec.set_time_sequence("max_keyframe_id", max_keyframe_id_);
-        
+        Sophus::SE3d Twc0 = kf_sort[0].second->pose_.inverse() * camera_left_->pose_inv_;
+        const Eigen::Vector3f camera_position = Twc0.translation().cast<float>();
+        Eigen::Matrix3f camera_orientation = Twc0.rotationMatrix().cast<float>();
+        rec.log("world/landmarks",
+                rerun::Transform3D(
+                    rerun::Vec3D(camera_position.data()),
+                    rerun::Mat3x3(camera_orientation.data()), true)
+            );
+
         // Draw active landmarks
         std::vector<Eigen::Vector3f> points3d_vector;
         for(auto iter{active_landmarks_.begin()}; iter != active_landmarks_.end(); iter++)
@@ -61,37 +112,6 @@ namespace slam
             points3d_vector.push_back(iter->second->pos_.cast<float>());
         }
         rec.log("world/landmarks", rerun::Points3D(points3d_vector));
-
-        // left camera pinwhole model
-        double fx{camera_left_->fx_};
-        double fy{camera_left_->fy_};
-        double img_num_rows{current_frame_->left_img_.rows};
-        double img_num_cols{current_frame_->left_img_.cols};
-        rec.log(
-            "world/left",
-            rerun::Pinhole::from_focal_length_and_resolution({fx, fy}, {img_num_cols, img_num_rows})
-        );
-
-        // Left camera pose 
-        Sophus::SE3d Twc = current_frame_->pose_.inverse();
-        const Eigen::Vector3f camera_position = Twc.translation().cast<float>();
-        Eigen::Matrix3f camera_orientation = Twc.rotationMatrix().cast<float>();
-    
-        rec.log(
-            "world/left",
-            rerun::Transform3D(
-                rerun::Vec3D(camera_position.data()),
-                rerun::Mat3x3(camera_orientation.data())
-            )
-        );
-
-        // Draw stereo images of current frame        
-        rec.log("world/left", rerun::Image(tensor_shape(current_frame_->left_img_), 
-                              rerun::TensorBuffer::u8(current_frame_->left_img_)));
-                              
-        rec.log("world/right", rerun::Image(tensor_shape(current_frame_->right_img_), 
-                              rerun::TensorBuffer::u8(current_frame_->right_img_)));
-
 
     }
 
