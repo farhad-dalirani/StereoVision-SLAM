@@ -1,7 +1,12 @@
 #include<StereoVisionSLAM/map.h>
+#include "StereoVisionSLAM/config.h"
 
 namespace slam
 {
+    Map::Map()
+    {
+        num_active_keyframes_ = Config::Get<int>("num_active_keyframes");
+    }
 
     void Map::CleanMap()
     {

@@ -2,12 +2,14 @@
 
 dataset_dir: ./data/dataset/sequences/05
 
-# camera intrinsics
-camera.fx: 517.3
-camera.fy: 516.5
-camera.cx: 325.1
-camera.cy: 249.7
-
 num_features: 150
 num_features_init: 50
 num_features_tracking: 50
+num_features_tracking_bad: 20
+num_features_needed_for_keyframe: 80
+
+num_active_keyframes: 7
+
+left_cam_index: 0
+right_cam_index: 1
+is_color_input: 0

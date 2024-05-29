@@ -34,13 +34,13 @@ namespace slam
             
             const rerun::RecordingStream rec = rerun::RecordingStream("rerun_Stereo_Vision_SLAM");
 
-            Frame::Ptr current_frame_ = nullptr;
-            Map::Ptr map_ = nullptr;
-            Camera::Ptr camera_left_ = nullptr;
-            Camera::Ptr camera_right_ = nullptr;
+            Frame::Ptr current_frame_{nullptr};
+            Map::Ptr map_{nullptr};
+            Camera::Ptr camera_left_{nullptr};
+            Camera::Ptr camera_right_{nullptr};
 
-            bool viewer_running_ = true;
-
+            bool viewer_running_{true};
+            
             std::unordered_map<unsigned long, Frame::Ptr> all_keyframes_;
             std::unordered_map<unsigned long, Frame::Ptr> active_keyframes_;
             std::unordered_map<unsigned long, MapPoint::Ptr> active_landmarks_;

@@ -28,7 +28,7 @@ namespace slam
         private:
             // Root path of video sequence in KITTI
             std::string dataset_path_;
-            // KITTI has 4 cameras, we used cameras 0 and 1
+            // KITTI has 4 cameras, we used cameras 0 and 1 by default
             int left_cam_index_{0};
             int right_cam_index_{1};
             // Flag for reading gray/color images

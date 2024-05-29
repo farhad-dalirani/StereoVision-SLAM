@@ -15,7 +15,7 @@ namespace slam
             typedef std::unordered_map<unsigned long, MapPoint::Ptr> LandmarksType;
             typedef std::unordered_map<unsigned long, Frame::Ptr> KeyframesType;
 
-            Map(){}
+            Map();
 
             // Clean up the points with zero observations from active
             // landmarks of the map
@@ -46,10 +46,10 @@ namespace slam
             // Active key frames; Hashtable (id-keyframe)
             KeyframesType active_keyframes_;
 
-            Frame::Ptr current_frame_ = nullptr;
+            Frame::Ptr current_frame_{nullptr};
 
             // Hyper-parameter: number of active keyframes
-            int num_active_keyframes_{17};
+            int num_active_keyframes_{9};
 
             // Set old keyframes to inactive state
             void RemoveOldKeyframe();

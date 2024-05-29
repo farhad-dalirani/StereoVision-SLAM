@@ -12,6 +12,8 @@ namespace slam
         num_features_ = Config::Get<int>("num_features");
         num_features_init_ = Config::Get<int>("num_features_init");
         num_features_tracking_ = Config::Get<int>("num_features_tracking");
+        num_features_tracking_bad_ = Config::Get<int>("num_features_tracking_bad");
+        num_features_needed_for_keyframe_ = Config::Get<int>("num_features_needed_for_keyframe");
 
         // Initialize keypoint detector
         gftt_ = cv::GFTTDetector::create(num_features_, 0.01, 20);

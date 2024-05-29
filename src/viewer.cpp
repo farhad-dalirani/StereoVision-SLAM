@@ -23,12 +23,6 @@ namespace slam
 
         // World orgin
         rec.log_static("world", rerun::ViewCoordinates::RIGHT_HAND_Z_UP); // Set an up-axis
-        rec.log_static(
-            "world",
-            rerun::Arrows3D::from_vectors({{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}
-            ).with_colors({{255, 0, 0}, {0, 255, 0}, {0, 0, 255}})
-        );
-
     }
 
     void Viewer::Close() 
@@ -89,14 +83,17 @@ namespace slam
             rec.log(entity_name,
                     rerun::Pinhole::from_focal_length_and_resolution({fx, fy}, {img_num_cols, img_num_rows}));
 
-            // Draw stereo images of newest active keyframe
+            // For newest active keyframe
             if(i == 0)
-            {        
+            {
+                // Draw stereo left image 
                 rec.log(entity_name, 
-                        rerun::Image(tensor_shape(kf_sort[i].second->left_img_), 
-                                    rerun::TensorBuffer::u8(kf_sort[i].second->left_img_)));
+                        rerun::Image(tensor_shape(kf_sort[0].second->left_img_), 
+                                    rerun::TensorBuffer::u8(kf_sort[0].second->left_img_)));
             }
         }
+
+        
 
         // Draw active landmarks (map points) in coordinate of newest active keyframe
         Sophus::SE3d Twc0 = kf_sort[0].second->pose_.inverse() * camera_left_->pose_inv_;
@@ -107,20 +104,11 @@ namespace slam
                     rerun::Vec3D(camera_position.data()),
                     rerun::Mat3x3(camera_orientation.data()), true));
         std::vector<Eigen::Vector3f> points3d_vector;
-        std::vector<rerun::Color> points3d_color; 
         for(auto iter{active_landmarks_.begin()}; iter != active_landmarks_.end(); iter++)
         {
             points3d_vector.push_back(iter->second->pos_.cast<float>());
-            if (iter->second->is_outlier_)
-            {
-                points3d_color.emplace_back(255, 0, 0);
-            }
-            else
-            {
-                points3d_color.emplace_back(0, 255, 255);
-            }
         }
-        rec.log("world/landmarks", rerun::Points3D(points3d_vector).with_colors(points3d_color));
+        rec.log("world/landmarks", rerun::Points3D(points3d_vector));
 
         // Draw trajectory in coordinate of newest active keyframe       
         rec.log("world/path",

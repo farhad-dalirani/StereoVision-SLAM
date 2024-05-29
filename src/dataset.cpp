@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include "StereoVisionSLAM/slamexception.h"
+#include "StereoVisionSLAM/config.h"
 
 namespace slam
 {
@@ -10,6 +11,14 @@ namespace slam
     Dataset::Dataset(const std::string &dataset_path)
     : dataset_path_(dataset_path)
     {
+        // Set index of left and right cameras among cameras in stereo vision system
+        left_cam_index_ = Config::Get<int>("left_cam_index");
+        right_cam_index_ = Config::Get<int>("right_cam_index");
+
+        if(Config::Get<int>("is_color_input") != 0)
+        {
+            flag_read_img_ == cv::IMREAD_COLOR;
+        }
     }
 
     bool Dataset::initialize()
