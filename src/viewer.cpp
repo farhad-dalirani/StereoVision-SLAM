@@ -47,6 +47,7 @@ namespace slam
         assert(map_ != nullptr);
         
         // Get active landmarks and keypoints
+        all_keyframes_ = map_->GetAllKeyFrames();
         active_keyframes_ = map_->GetActiveKeyFrames();
         active_landmarks_ = map_->GetActiveMapPoints();
 
@@ -62,7 +63,7 @@ namespace slam
         // Draw all active keyframes
         for(size_t i{0}; i < kf_sort.size(); ++i)
         {
-            std::string entity_name = std::string("world/stereosys")+ std::to_string(i) + std::string("/cam_left");
+            std::string entity_name = std::string("world/stereosys") + std::to_string(i) + std::string("/cam_left");
             
             if (i != 0)
             {
@@ -102,9 +103,7 @@ namespace slam
         rec.log("world/landmarks",
                 rerun::Transform3D(
                     rerun::Vec3D(camera_position.data()),
-                    rerun::Mat3x3(camera_orientation.data()), true)
-            );
-
+                    rerun::Mat3x3(camera_orientation.data()), true));
         // Draw active landmarks
         std::vector<Eigen::Vector3f> points3d_vector;
         for(auto iter{active_landmarks_.begin()}; iter != active_landmarks_.end(); iter++)
@@ -112,6 +111,21 @@ namespace slam
             points3d_vector.push_back(iter->second->pos_.cast<float>());
         }
         rec.log("world/landmarks", rerun::Points3D(points3d_vector));
+
+        
+        
+        rec.log("world/path",
+                rerun::Transform3D(
+                    rerun::Vec3D(camera_position.data()),
+                    rerun::Mat3x3(camera_orientation.data()), true));
+        std::vector<rerun::datatypes::Vec3D> path;
+        for(unsigned i{0}; i < kf_sort[0].first; ++i)
+        {   
+
+            Eigen::Vector3f cam_position = (all_keyframes_[i]->pose_.inverse() * camera_left_->pose_).translation().cast<float>();
+            path.emplace_back(cam_position.data());
+        }
+        rec.log("world/path", rerun::LineStrips3D(rerun::LineStrip3D(path)));
 
     }
 

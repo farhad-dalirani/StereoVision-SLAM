@@ -58,6 +58,7 @@ struct rerun::CollectionAdapter<rerun::Position3D, std::vector<Eigen::Vector3f>>
     }
 };
 
+
 template <>
 struct rerun::CollectionAdapter<rerun::Position3D, Eigen::Matrix3Xf> 
 {
@@ -88,6 +89,7 @@ struct rerun::CollectionAdapter<rerun::Position3D, Eigen::Matrix3Xf>
         return Collection<rerun::Position3D>::take_ownership(std::move(positions));
     }
 };
+
 
 rerun::Collection<rerun::TensorDimension> tensor_shape(const cv::Mat& img)
 {

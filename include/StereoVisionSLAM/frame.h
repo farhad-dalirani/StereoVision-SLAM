@@ -20,7 +20,7 @@ namespace slam
              * frame to current frame be less than a threshold */
             bool is_keyframe_{false};
             /* Tcw: Transformation from world coordinate
-             * to left camera coordinate of this frame */
+             * to stereo system coordinate at this frame */
             Sophus::SE3d pose_;
             // Mutex for accessing pose
             std::mutex pose_mutex_;

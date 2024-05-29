@@ -41,6 +41,7 @@ namespace slam
 
             bool viewer_running_ = true;
 
+            std::unordered_map<unsigned long, Frame::Ptr> all_keyframes_;
             std::unordered_map<unsigned long, Frame::Ptr> active_keyframes_;
             std::unordered_map<unsigned long, MapPoint::Ptr> active_landmarks_;
 
