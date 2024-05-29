@@ -213,45 +213,6 @@ namespace slam
                 // Calculate error of projected point and its corresponding 2D feature
                 _error = _measurement - pos_pixel.head<2>();
             }
-
-            virtual void linearizeOplus() override
-            {
-                /* Computes the Jacobian of the error function
-                 * with respect to parameters (frame pose and landmark position)
-                 *
-                 * Gradient calculation similar to
-                 * 6.7.3 [Solve PnP by Minimizing the Reprojection Error]
-                 * in the book "Introduction to Visual SLAM: From Theory to Practice" 
-                 * by Xiang Gao and Tao Zhang.
-                 * */
-                
-                // Retreive estimated frame pose and landmark position
-                const VertexPose *v0 = static_cast<VertexPose *>(_vertices[0]);
-                const VertexXYZ *v1 = static_cast<VertexXYZ *>(_vertices[1]);
-                Sophus::SE3d T = v0->estimate();
-                Eigen::Vector3d pw = v1->estimate();
-
-                Eigen::Vector3d pos_cam = _cam_ext * T * pw;
-
-                // Camera intrinsic parameters
-                double fx = _K(0, 0);
-                double fy = _K(1, 1);
-                double X = pos_cam[0];
-                double Y = pos_cam[1];
-                double Z = pos_cam[2];
-                double Zinv = 1.0 / (Z + 1e-18);
-                double Zinv2 = Zinv * Zinv;
-                
-                // Derivative with respect to frame pose
-                _jacobianOplusXi << -fx * Zinv, 0, fx * X * Zinv2, fx * X * Y * Zinv2,
-                                    -fx - fx * X * X * Zinv2, fx * Y * Zinv, 0, -fy * Zinv,
-                                    fy * Y * Zinv2, fy + fy * Y * Y * Zinv2, -fy * X * Y * Zinv2,
-                                    -fy * X * Zinv;
-                // Derivative with respect to landmark position
-                _jacobianOplusXj = _jacobianOplusXi.block<2, 3>(0, 0) *
-                           _cam_ext.rotationMatrix() * T.rotationMatrix();
-
-            }
             
             // For reading and writing into file, not implemented
             virtual bool read(std::istream &in) override { return true; }
