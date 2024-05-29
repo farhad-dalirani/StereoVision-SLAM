@@ -60,7 +60,7 @@ namespace slam
 
         // Use most recent active keyframe id as sequence number for visualization
         rec.set_time_sequence("max_keyframe_id", kf_sort[0].first);
-
+        
         // Draw all active keyframes in coordinate of most recent active keyframe
         for(size_t i{0}; i < kf_sort.size(); ++i)
         {
@@ -107,11 +107,20 @@ namespace slam
                     rerun::Vec3D(camera_position.data()),
                     rerun::Mat3x3(camera_orientation.data()), true));
         std::vector<Eigen::Vector3f> points3d_vector;
+        std::vector<rerun::Color> points3d_color; 
         for(auto iter{active_landmarks_.begin()}; iter != active_landmarks_.end(); iter++)
         {
             points3d_vector.push_back(iter->second->pos_.cast<float>());
+            if (iter->second->is_outlier_)
+            {
+                points3d_color.emplace_back(255, 0, 0);
+            }
+            else
+            {
+                points3d_color.emplace_back(0, 255, 255);
+            }
         }
-        rec.log("world/landmarks", rerun::Points3D(points3d_vector));
+        rec.log("world/landmarks", rerun::Points3D(points3d_vector).with_colors(points3d_color));
 
         // Draw trajectory in coordinate of newest active keyframe       
         rec.log("world/path",

@@ -49,7 +49,7 @@ namespace slam
             Frame::Ptr current_frame_ = nullptr;
 
             // Hyper-parameter: number of active keyframes
-            int num_active_keyframes_{7};
+            int num_active_keyframes_{17};
 
             // Set old keyframes to inactive state
             void RemoveOldKeyframe();
