@@ -2,8 +2,16 @@
 
 int main(int argc, char **argv) 
 {
-    
-    std::string config_file_path = "./config/default.yaml";
+    // Config file path
+    std::string config_file_path;
+    if (argc > 1) 
+    {
+        config_file_path = argv[1];
+    } 
+    else 
+    {
+        config_file_path = "./config/default.yaml";
+    }
     
     std::cout << "Outputs are visualized in Rerun Viewer." << std::endl;
 
