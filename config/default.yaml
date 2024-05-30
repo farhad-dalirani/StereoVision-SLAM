@@ -8,7 +8,7 @@ num_features_tracking: 50
 num_features_tracking_bad: 20
 num_features_needed_for_keyframe: 80
 
-num_active_keyframes: 7
+num_active_keyframes: 17
 
 left_cam_index: 0
 right_cam_index: 1
