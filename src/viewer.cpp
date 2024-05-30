@@ -141,4 +141,11 @@ namespace slam
         rec.log("world/log", rerun::TextLog(msg));
     }
 
+    void Viewer::LogInfoMKF(std::string msg, unsigned long maxkeyframe_id)
+    {
+        // Rerun log with largest id amont active keyframes' id
+        rec.set_time_sequence("max_keyframe_id", maxkeyframe_id);
+        rec.log("world/log", rerun::TextLog(msg));
+    }
+
 }  

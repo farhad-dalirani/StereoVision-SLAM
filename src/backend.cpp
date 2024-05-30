@@ -188,7 +188,7 @@ namespace slam
             if (ef.first->chi2() > chi2_th) 
             {
                 ef.second->outlier_ = true;
-                // remove the observation-map point link
+                // Remove the observation-map point link
                 ef.second->map_point_.lock()->RemoveObservation(ef.second);
             } 
             else 
@@ -197,8 +197,8 @@ namespace slam
             }
         }
 
-        std::cout << "Outlier/Inlier in optimization: " << cnt_outlier << "/"
-                << cnt_inlier << std::endl;
+        viewer_->LogInfoMKF("Backend: Outlier/Inlier in optimization " + 
+                            std::to_string(cnt_outlier) + "/" + std::to_string(cnt_inlier), max_kf_id);
 
         // Update keyframes' pose and landmarks' position with optimized vaules 
         for (auto &v : vertices) 
@@ -263,6 +263,11 @@ namespace slam
     void Backend::SetMap(Map::Ptr map) 
     { 
         map_ = map; 
+    }
+
+    void Backend::SetViewer(std::shared_ptr<Viewer> viewer)
+    {
+        viewer_ = viewer;
     }
 
 }

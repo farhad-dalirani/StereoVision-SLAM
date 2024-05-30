@@ -4,6 +4,7 @@
 #include "StereoVisionSLAM/common_include.h"
 #include "StereoVisionSLAM/frame.h"
 #include "StereoVisionSLAM/map.h"
+#include "StereoVisionSLAM/viewer.h"
 #include "StereoVisionSLAM/camera.h"
 
 namespace slam
@@ -31,11 +32,14 @@ namespace slam
             void Stop(); 
 
             void SetMap(std::shared_ptr<Map> map);
+            void SetViewer(std::shared_ptr<Viewer> viewer);
             void SetCameras(Camera::Ptr left, Camera::Ptr right);
 
 
         private:
-            Map::Ptr map_;
+            Map::Ptr map_{nullptr};
+            std::shared_ptr<Viewer> viewer_{nullptr};
+
             std::thread backend_thread_;
             std::mutex data_mutex_;
             

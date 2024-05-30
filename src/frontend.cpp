@@ -521,7 +521,11 @@ namespace slam
         current_frame_->SetKeyFrame();
         map_->InsertKeyFrame(current_frame_);
 
-        viewer_->LogInfoCFR(std::string("Frontend: Set frame ") + std::to_string(current_frame_->id_) + std::string(" as keyframe ") + std::to_string(current_frame_->keyframe_id_), current_frame_->id_);
+        viewer_->LogInfoCFR(std::string("Frontend: Set frame ") + 
+                                std::to_string(current_frame_->id_) + 
+                                std::string(" as keyframe ") + 
+                                std::to_string(current_frame_->keyframe_id_),
+                            current_frame_->id_);
 
         SetObservationsForKeyFrame();
 

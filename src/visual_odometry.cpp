@@ -46,6 +46,7 @@ namespace slam
         frontend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
         
         backend_->SetMap(map_);
+        backend_->SetViewer(viewer_);
         backend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
 
 

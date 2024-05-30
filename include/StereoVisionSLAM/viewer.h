@@ -30,7 +30,11 @@ namespace slam
 
             void UpdateMap();
 
+            // Log in rerun viewer with id of current frame as index
             void LogInfoCFR(std::string msg, unsigned long currentframe_id);
+
+            // Log in rerun viewer with id of most recent active keyframe as index
+            void LogInfoMKF(std::string msg, unsigned long maxkeyframe_id);
 
         private:
             

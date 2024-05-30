@@ -26,7 +26,7 @@ namespace slam
                 iter++;
             }
         }
-        std::cout << "Removed " << cnt_removed_active_lan << " active landmarks." << std::endl;
+    
     }
 
     void Map::InsertKeyFrame(Frame::Ptr frame)
@@ -112,8 +112,6 @@ namespace slam
         {
             frame_to_remove = active_keyframes_.at(max_kf_id);
         }
-
-        std::cout << "Remove keyframe " << frame_to_remove->keyframe_id_ << std::endl;
 
         // remove keyframe from active key frames
         active_keyframes_.erase(frame_to_remove->keyframe_id_);
