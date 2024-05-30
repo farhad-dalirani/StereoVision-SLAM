@@ -30,6 +30,8 @@ namespace slam
 
             void UpdateMap();
 
+            void LogInfoCFR(std::string msg, unsigned long currentframe_id);
+
         private:
             
             const rerun::RecordingStream rec = rerun::RecordingStream("rerun_Stereo_Vision_SLAM");

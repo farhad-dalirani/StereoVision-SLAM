@@ -44,7 +44,8 @@ namespace slam
                 std::make_shared<Feature>(current_frame_, kp));
         }
 
-        std::cout << "Detect " << cnt_detected << " new features" << std::endl;
+        viewer_->LogInfoCFR(std::string("Frontend: Detect ") + std::to_string(cnt_detected) + std::string(" new features"), current_frame_->id_);
+
         return cnt_detected;
     }
 
@@ -105,7 +106,8 @@ namespace slam
             }
         }
 
-        std::cout << "Find " << num_good_pts << " in the right image." << std::endl;
+        viewer_->LogInfoCFR(std::string("Frontend: Find ") + std::to_string(num_good_pts) + std::string(" in the right image"), current_frame_->id_);
+
         return num_good_pts;
     }
 
@@ -168,7 +170,7 @@ namespace slam
         // Signal for performing backend optimization (boundle adjustment)
         backend_->UpdateMap();
 
-        std::cout << "Initial map created with " << cnt_init_landmarks << " map points" << std::endl;
+        viewer_->LogInfoCFR(std::string("Frontend: Initial map created with ") + std::to_string(cnt_init_landmarks) + std::string(" map points"), current_frame_->id_);
 
         return true;
     }
@@ -264,7 +266,8 @@ namespace slam
             }
         }
 
-        std::cout << "new landmarks: " << cnt_triangulated_pts << std::endl;
+        viewer_->LogInfoCFR(std::string("Frontend: ") + std::to_string(cnt_triangulated_pts) + std::string(" new landmarks by triangulation"), current_frame_->id_);
+
         return cnt_triangulated_pts;
     }
 
@@ -321,7 +324,8 @@ namespace slam
             }
         }
 
-        std::cout << "Find " << num_good_pts << " in the last image." << std::endl;
+        viewer_->LogInfoCFR(std::string("Frontend: Tracked ") + std::to_string(num_good_pts) + std::string(" from the last image"), current_frame_->id_);
+
         return num_good_pts;
     }
 
@@ -460,12 +464,10 @@ namespace slam
 
         }
 
-        std::cout << "Outlier/Inlier in pose estimating: " << cnt_outlier << "/"  << features.size() - cnt_outlier;
+        viewer_->LogInfoCFR(std::string("Frontend: Outlier/Inlier in pose estimating: ") + std::to_string(cnt_outlier) + "/" + std::to_string(features.size() - cnt_outlier), current_frame_->id_);
         
         // Set pose of current frame
         current_frame_->SetPose(vertex_pose->estimate());
-
-        std::cout << "Current Pose = \n" << current_frame_->Pose().matrix() << std::endl;
 
         /* Remove links between landmarks (3D points in the map) 
          * and features that are outliers */
@@ -519,9 +521,8 @@ namespace slam
         current_frame_->SetKeyFrame();
         map_->InsertKeyFrame(current_frame_);
 
-        std::cout << "Set frame " << current_frame_->id_ << " as keyframe "
-              << current_frame_->keyframe_id_ << std::endl;
- 
+        viewer_->LogInfoCFR(std::string("Frontend: Set frame ") + std::to_string(current_frame_->id_) + std::string(" as keyframe ") + std::to_string(current_frame_->keyframe_id_), current_frame_->id_);
+
         SetObservationsForKeyFrame();
 
         // Detect new keypoint features in current frame left image
@@ -619,7 +620,7 @@ namespace slam
 
     bool Frontend::Reset() 
     {
-        std::cout << "Reset is not implemented. " << std::endl;
+        viewer_->LogInfoCFR(std::string("Frontend: Reset is not implemented"), current_frame_->id_);
         return true;
     }
 

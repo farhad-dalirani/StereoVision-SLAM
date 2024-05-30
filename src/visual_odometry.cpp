@@ -29,11 +29,7 @@ namespace slam
                         Dataset(Config::Get<std::string>("dataset_dir"))); 
         
         // Initialize dataset
-        if(dataset_->initialize())
-        {
-            std::cout << "Dataset was initialized." << std::endl; 
-        }
-        else
+        if(!dataset_->initialize())
         {
             throw SLAMException("Cannot initialize object to read dataset.");
         }
@@ -70,6 +66,8 @@ namespace slam
             return false;
         }
 
+        viewer_->LogInfoCFR(std::string("VO        : new frame process is running"), new_frame->id_);
+
         auto t1 = std::chrono::steady_clock::now();
 
         // Feed new frame to the stereo visual slam pipeline
@@ -79,8 +77,8 @@ namespace slam
         auto time_used =
             std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
         
-        std::cout << "VO cost time: " << time_used.count() << " seconds." << std::endl;
-
+        viewer_->LogInfoCFR(std::string("VO        : new frame process cost time ") + std::to_string(time_used.count()) + std::string(" seconds"), new_frame->id_);
+        
         return success;
     }
 
@@ -91,9 +89,7 @@ namespace slam
 
         // Feed every frame of sequence to SLAM pipleline 
         while (true)
-        {
-            std::cout << "VO is running" << std::endl;
-            
+        {          
             if(step() == false)
             {
                 // If there no other frame in sequence, stop
@@ -104,8 +100,6 @@ namespace slam
         // Stop other components
         backend_->Stop();
         viewer_->Close();
-
-        std::cout << "VO exit" << std::endl;
     } 
 
     FrontendStatus VisualOdometry::GetFrontendStatus() const

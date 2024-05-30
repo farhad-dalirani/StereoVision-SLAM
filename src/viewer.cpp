@@ -23,10 +23,17 @@ namespace slam
 
         // World orgin
         rec.log_static("world", rerun::ViewCoordinates::RIGHT_HAND_Z_UP); // Set an up-axis
+
+        // Set costum timing for illustrating data
+        rec.set_time_sequence("max_keyframe_id", 0);
+
+        // Set costum timing for illustrating data
+        rec.set_time_sequence("currentframe_id", 0);
     }
 
     void Viewer::Close() 
     {
+        rec.log("world/log", rerun::TextLog("Finished"));
     }
 
     void Viewer::AddCurrentFrame(Frame::Ptr current_frame) 
@@ -54,6 +61,7 @@ namespace slam
 
         // Use most recent active keyframe id as sequence number for visualization
         rec.set_time_sequence("max_keyframe_id", kf_sort[0].first);
+        rec.set_time_sequence("currentframe_id", current_frame_->id_);
         
         // Draw all active keyframes in coordinate of most recent active keyframe
         for(size_t i{0}; i < kf_sort.size(); ++i)
@@ -126,5 +134,11 @@ namespace slam
 
     }
 
+    void Viewer::LogInfoCFR(std::string msg, unsigned long currentframe_id)
+    {
+        // Rerun log with current frame as reference
+        rec.set_time_sequence("currentframe_id", currentframe_id);
+        rec.log("world/log", rerun::TextLog(msg));
+    }
 
 }  
