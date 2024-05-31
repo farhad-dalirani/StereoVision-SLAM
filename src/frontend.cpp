@@ -178,8 +178,11 @@ namespace slam
         current_frame_->SetKeyFrame();
         map_->InsertKeyFrame(current_frame_);
 
-        // Signal for performing backend optimization (boundle adjustment)
-        backend_->UpdateMap();
+        if(backend_)
+        {
+            // Signal for performing backend optimization (boundle adjustment)
+            backend_->UpdateMap();
+        }
 
         if(viewer_)
         {
@@ -570,9 +573,12 @@ namespace slam
         // Triangulate track fetures in left and righ images 
         TriangulateNewPoints();
 
-        // update backend because we have a new keyframe
-        backend_->UpdateMap();
-        
+        if(backend_)
+        {
+            // update backend because we have a new keyframe
+            backend_->UpdateMap();
+        }
+
         if (viewer_)
         {
             viewer_->UpdateMap();

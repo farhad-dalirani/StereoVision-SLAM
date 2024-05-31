@@ -36,7 +36,10 @@ namespace slam
         
         // Create components
         frontend_ = std::make_shared<Frontend>();
-        backend_ = std::make_shared<Backend>();
+        if(Config::Get<int>("backend_on") >= 1)
+        {
+            backend_ = std::make_shared<Backend>();
+        }
         map_ = std::make_shared<Map>();
         if(Config::Get<int>("visualizer_on") >= 1)
         {
@@ -48,9 +51,12 @@ namespace slam
         frontend_->SetViewer(viewer_);
         frontend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
         
-        backend_->SetMap(map_);
-        backend_->SetViewer(viewer_);
-        backend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+        if(backend_)
+        {
+            backend_->SetMap(map_);
+            backend_->SetViewer(viewer_);
+            backend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+        }
 
         if(viewer_)
         {
@@ -112,7 +118,11 @@ namespace slam
         }
         
         // Stop other components
-        backend_->Stop();
+        if(backend_)
+        {
+            backend_->Stop();
+        }
+
         if(viewer_)
         {
             viewer_->Close();

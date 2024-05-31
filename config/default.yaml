@@ -12,6 +12,7 @@ max_triangulation_depth: 300.0
 num_active_keyframes: 17
 
 # Backend Hyperparameters
+backend_on: 1
 chi2_th: 5.991
 
 # Dataset
