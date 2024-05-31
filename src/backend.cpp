@@ -191,7 +191,11 @@ namespace slam
             {
                 ef.second->outlier_ = true;
                 // Remove the observation-map point link
-                ef.second->map_point_.lock()->RemoveObservation(ef.second);
+                MapPoint::Ptr map_p = ef.second->map_point_.lock();
+                if(map_p)
+                {
+                    map_p->RemoveObservation(ef.second);
+                }
             } 
             else 
             {
