@@ -59,7 +59,9 @@ namespace slam
         }
 
         // Camera intrinsic parameter
-        Eigen::Matrix3d K = cam_left_->K();
+        Eigen::Matrix3d K_left = cam_left_->K();
+        Eigen::Matrix3d K_right = cam_right_->K();
+
         // Camera pose in reference coordinate frame of stereo system
         Sophus::SE3d left_ext = cam_left_->pose();
         Sophus::SE3d right_ext = cam_right_->pose();
@@ -124,11 +126,11 @@ namespace slam
                     EdgeProjection *edge = nullptr;
                     if(feat->is_on_left_image_)
                     {
-                        edge = new EdgeProjection(K, left_ext);
+                        edge = new EdgeProjection(K_left, left_ext);
                     }
                     else
                     {
-                        edge = new EdgeProjection(K, right_ext);
+                        edge = new EdgeProjection(K_right, right_ext);
                     }
 
                     edge->setId(index);
@@ -153,8 +155,8 @@ namespace slam
         optimizer.optimize(10);
 
         // Detect keypoint features that are outliers
-        int cnt_outlier = 0, cnt_inlier = 0;
-        int iteration = 0;
+        int cnt_outlier {0}, cnt_inlier {0};
+        int iteration {0};
         while (iteration < 5) 
         {
             cnt_outlier = 0;
