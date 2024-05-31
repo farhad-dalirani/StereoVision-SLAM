@@ -2,6 +2,7 @@
 #include "StereoVisionSLAM/algorithm.h"
 #include "StereoVisionSLAM/config.h"
 #include "StereoVisionSLAM/g2o_types.h"
+#include "StereoVisionSLAM/slamexception.h"
 
 namespace slam
 {
@@ -17,7 +18,19 @@ namespace slam
         max_triangulation_depth_ = Config::Get<double>("max_triangulation_depth");
 
         // Initialize keypoint detector
-        gftt_ = cv::GFTTDetector::create(num_features_, 0.01, 20);
+        std::string detector_type = Config::Get<std::string>("keypoint_feature_detector");
+        if (detector_type == std::string("GFTT")) 
+        {
+            kp_detector_ = cv::GFTTDetector::create(num_features_, 0.01, 20);
+        } 
+        else if (detector_type == std::string("ORB")) 
+        {
+            kp_detector_ = cv::ORB::create(num_features_);
+        } 
+        else
+        {
+            throw SLAMException("The selected keypoint feature detector is not correct.");
+        }
     }
 
     int Frontend::DetectFeatures()
@@ -35,7 +48,7 @@ namespace slam
 
         // detect keypoints
         std::vector<cv::KeyPoint> keypoints;
-        gftt_->detect(current_frame_->left_img_, keypoints, mask);
+        kp_detector_->detect(current_frame_->left_img_, keypoints, mask);
         int cnt_detected{keypoints.size()};
         
         // Add new keypoint to features of left image 

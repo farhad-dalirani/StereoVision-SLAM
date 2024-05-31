@@ -78,7 +78,7 @@ namespace slam
             double max_triangulation_depth_{300.0};
 
             // Keypoint feature Detector
-            cv::Ptr<cv::GFTTDetector> gftt_;
+            cv::Ptr<cv::Feature2D> kp_detector_;
 
             // Detect keypoint features in current frame
             int DetectFeatures();
