@@ -67,7 +67,7 @@ namespace slam
             return false;
         }
 
-        viewer_->LogInfoCFR(std::string("VO        : new frame process is running"), new_frame->id_);
+        viewer_->LogInfo(std::string("VO         : new frame process is running"));
 
         auto t1 = std::chrono::steady_clock::now();
 
@@ -78,7 +78,9 @@ namespace slam
         auto time_used =
             std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
         
-        viewer_->LogInfoCFR(std::string("VO        : new frame process cost time ") + std::to_string(time_used.count()) + std::string(" seconds"), new_frame->id_);
+        viewer_->LogInfo(std::string("VO        : new frame process cost time ") + 
+                         std::to_string(time_used.count()) + 
+                         std::string(" seconds"));
         
         return success;
     }

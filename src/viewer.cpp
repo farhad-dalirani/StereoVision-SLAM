@@ -61,7 +61,6 @@ namespace slam
 
         // Use most recent active keyframe id as sequence number for visualization
         rec.set_time_sequence("max_keyframe_id", kf_sort[0].first);
-        rec.set_time_sequence("currentframe_id", current_frame_->id_);
         
         // Draw all active keyframes in coordinate of most recent active keyframe
         for(size_t i{0}; i < kf_sort.size(); ++i)
@@ -134,18 +133,34 @@ namespace slam
 
     }
 
-    void Viewer::LogInfoCFR(std::string msg, unsigned long currentframe_id)
+    void Viewer::LogInfo(std::string msg)
     {
-        // Rerun log with current frame as reference
-        rec.set_time_sequence("currentframe_id", currentframe_id);
+        // Rerun log with current frame id as reference
+        if(current_frame_)
+        {
+            rec.set_time_sequence("currentframe_id", current_frame_->id_);
+        }
+        else
+        {
+            rec.set_time_sequence("currentframe_id", 0);
+        }
         rec.log("world/log", rerun::TextLog(msg));
     }
 
     void Viewer::LogInfoMKF(std::string msg, unsigned long maxkeyframe_id)
     {
-        // Rerun log with largest id amont active keyframes' id
+        // Rerun log with given keyframe id
+        if(current_frame_)
+        {
+            rec.set_time_sequence("currentframe_id", current_frame_->id_);
+        }
+        else
+        {
+            rec.set_time_sequence("currentframe_id", 0);
+        }
         rec.set_time_sequence("max_keyframe_id", maxkeyframe_id);
         rec.log("world/log", rerun::TextLog(msg));
     }
+
 
 }  
