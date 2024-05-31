@@ -1,6 +1,7 @@
 #include "StereoVisionSLAM/backend.h"
 #include "StereoVisionSLAM/g2o_types.h"
 #include "StereoVisionSLAM/algorithm.h"
+#include "StereoVisionSLAM/config.h"
 
 namespace slam
 {
@@ -69,7 +70,7 @@ namespace slam
         // Add landmark vertices and edges to optimization graph
         std::map<unsigned long, VertexXYZ *> vertices_landmarks;
         int index{1};
-        double chi2_th{5.991}; // Robust Kernel threshold
+        double chi2_th{chi2_th_}; // Robust Kernel threshold
         std::map<EdgeProjection *, Feature::Ptr> edges_and_features;
         for(auto &landmark: landmarks)
         {
@@ -258,6 +259,9 @@ namespace slam
 
     Backend::Backend()
     {
+        // Set hyperparameters
+        chi2_th_ = Config::Get<double>("chi2_th");
+
         // Initialize backend optimization in a seprate thread
         backend_running_.store(true);
         backend_thread_ = std::thread(std::bind(&Backend::BackendLoop, this));

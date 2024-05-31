@@ -14,7 +14,7 @@ namespace slam
         num_features_tracking_ = Config::Get<int>("num_features_tracking");
         num_features_tracking_bad_ = Config::Get<int>("num_features_tracking_bad");
         num_features_needed_for_keyframe_ = Config::Get<int>("num_features_needed_for_keyframe");
-        max_triangulation_depth_ = Config::Get<int>("max_triangulation_depth");
+        max_triangulation_depth_ = Config::Get<double>("max_triangulation_depth");
 
         // Initialize keypoint detector
         gftt_ = cv::GFTTDetector::create(num_features_, 0.01, 20);

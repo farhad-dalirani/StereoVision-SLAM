@@ -49,6 +49,9 @@ namespace slam
             Camera::Ptr cam_left_{nullptr};
             Camera::Ptr cam_right_{nullptr};
 
+            // Robust Kernel threshold
+            double chi2_th_{5.991};
+
             // Refine pose of given keyframes and landmarks (bundle adjustment)
             void Optimize(Map::KeyframesType &keyframes, Map::LandmarksType &landmarks); 
             /* Waits for a signal to run the backend optimization on

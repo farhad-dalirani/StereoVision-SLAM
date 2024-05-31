@@ -12,7 +12,7 @@ max_triangulation_depth: 300.0
 num_active_keyframes: 17
 
 # Backend Hyperparameters
-
+chi2_th: 5.991
 
 # Dataset
 dataset_dir: ./data/dataset/sequences/05
