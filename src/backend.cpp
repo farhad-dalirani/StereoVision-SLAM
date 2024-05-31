@@ -197,8 +197,11 @@ namespace slam
             }
         }
 
-        viewer_->LogInfoMKF("Backend: Outlier/Inlier in optimization " + 
+        if(viewer_)
+        {
+            viewer_->LogInfoMKF("Backend: Outlier/Inlier in optimization " + 
                             std::to_string(cnt_outlier) + "/" + std::to_string(cnt_inlier), max_kf_id);
+        }
 
         // Update keyframes' pose and landmarks' position with optimized vaules 
         for (auto &v : vertices) 

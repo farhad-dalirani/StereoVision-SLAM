@@ -38,7 +38,10 @@ namespace slam
         frontend_ = std::make_shared<Frontend>();
         backend_ = std::make_shared<Backend>();
         map_ = std::make_shared<Map>();
-        viewer_ = std::make_shared<Viewer>();
+        if(Config::Get<int>("visualizer_on") >= 1)
+        {
+            viewer_ = std::make_shared<Viewer>();
+        }
 
         frontend_->SetBackend(backend_);
         frontend_->SetMap(map_);
@@ -49,9 +52,11 @@ namespace slam
         backend_->SetViewer(viewer_);
         backend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
 
-
-        viewer_->SetMap(map_);
-        viewer_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+        if(viewer_)
+        {
+            viewer_->SetMap(map_);
+            viewer_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+        }
 
         return true;
     }
@@ -67,7 +72,10 @@ namespace slam
             return false;
         }
 
-        viewer_->LogInfo(std::string("VO         : new frame process is running"));
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("VO         : new frame process is running"));
+        }
 
         auto t1 = std::chrono::steady_clock::now();
 
@@ -78,10 +86,13 @@ namespace slam
         auto time_used =
             std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
         
-        viewer_->LogInfo(std::string("VO        : new frame process cost time ") + 
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("VO        : new frame process cost time ") + 
                          std::to_string(time_used.count()) + 
                          std::string(" seconds"));
-        
+        }
+
         return success;
     }
 
@@ -102,7 +113,10 @@ namespace slam
         
         // Stop other components
         backend_->Stop();
-        viewer_->Close();
+        if(viewer_)
+        {
+            viewer_->Close();
+        }
     } 
 
     FrontendStatus VisualOdometry::GetFrontendStatus() const

@@ -44,9 +44,12 @@ namespace slam
                 std::make_shared<Feature>(current_frame_, kp));
         }
 
-        viewer_->LogInfo(std::string("Frontend: Detect ") + 
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("Frontend: Detect ") + 
                                 std::to_string(cnt_detected) +
                                 std::string(" new features"));
+        }
 
         return cnt_detected;
     }
@@ -108,9 +111,12 @@ namespace slam
             }
         }
 
-        viewer_->LogInfo(std::string("Frontend: Find ") +
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("Frontend: Find ") +
                             std::to_string(num_good_pts) + 
                             std::string(" in the right image"));
+        }
 
         return num_good_pts;
     }
@@ -174,9 +180,12 @@ namespace slam
         // Signal for performing backend optimization (boundle adjustment)
         backend_->UpdateMap();
 
-        viewer_->LogInfo(std::string("Frontend: Initial map created with ") + 
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("Frontend: Initial map created with ") + 
                          std::to_string(cnt_init_landmarks) + 
                          std::string(" map points"));
+        }
 
         return true;
     }
@@ -271,10 +280,13 @@ namespace slam
             }
         }
 
-        viewer_->LogInfo(std::string("Frontend: ") +
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("Frontend: ") +
                          std::to_string(cnt_triangulated_pts) +
                          std::string(" new landmarks by triangulation"));
-
+        }
+        
         return cnt_triangulated_pts;
     }
 
@@ -331,9 +343,12 @@ namespace slam
             }
         }
 
-        viewer_->LogInfo(std::string("Frontend: Tracked ") + 
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("Frontend: Tracked ") + 
                          std::to_string(num_good_pts) +
                          std::string(" from the last image"));
+        }
 
         return num_good_pts;
     }
@@ -473,10 +488,13 @@ namespace slam
 
         }
 
-        viewer_->LogInfo(std::string("Frontend: Outlier/Inlier in pose estimating: ") +
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("Frontend: Outlier/Inlier in pose estimating: ") +
                             std::to_string(cnt_outlier) + "/" + 
                             std::to_string(features.size() - cnt_outlier));
-        
+        }
+
         // Set pose of current frame
         current_frame_->SetPose(vertex_pose->estimate());
 
@@ -532,10 +550,13 @@ namespace slam
         current_frame_->SetKeyFrame();
         map_->InsertKeyFrame(current_frame_);
 
-        viewer_->LogInfo(std::string("Frontend: Set frame ") + 
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("Frontend: Set frame ") + 
                                 std::to_string(current_frame_->id_) + 
                                 std::string(" as keyframe ") + 
                                 std::to_string(current_frame_->keyframe_id_));
+        }
 
         SetObservationsForKeyFrame();
 
@@ -635,7 +656,10 @@ namespace slam
 
     bool Frontend::Reset() 
     {
-        viewer_->LogInfo(std::string("Frontend: Reset is not implemented"));
+        if(viewer_)
+        {
+            viewer_->LogInfo(std::string("Frontend: Reset is not implemented"));
+        }
         return true;
     }
 
