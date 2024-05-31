@@ -14,6 +14,7 @@ namespace slam
         num_features_tracking_ = Config::Get<int>("num_features_tracking");
         num_features_tracking_bad_ = Config::Get<int>("num_features_tracking_bad");
         num_features_needed_for_keyframe_ = Config::Get<int>("num_features_needed_for_keyframe");
+        max_triangulation_depth_ = Config::Get<int>("max_triangulation_depth");
 
         // Initialize keypoint detector
         gftt_ = cv::GFTTDetector::create(num_features_, 0.01, 20);
@@ -257,7 +258,9 @@ namespace slam
                 /* Perfrom triangulation to obtain 3d location of point in 
                  * stereo system coordinate */
                 Eigen::Vector3d pworld = Eigen::Vector3d::Zero();
-                if(triangulation(poses, points, pworld) and (pworld[2] > 0))
+                if(triangulation(poses, points, pworld) and 
+                    (pworld[2] > 0) and
+                    (pworld[2] <= max_triangulation_depth_))
                 {   
                     // Create a new map point by result of trangulation
                     MapPoint::Ptr new_map_point = MapPoint::CreateNewMappoint();

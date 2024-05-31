@@ -1,17 +1,24 @@
 %YAML:1.0
 
-dataset_dir: ./data/dataset/sequences/05
-
+# Frontend Hyperparameters
 num_features: 150
 num_features_init: 50
 num_features_tracking: 50
 num_features_tracking_bad: 20
 num_features_needed_for_keyframe: 80
+max_triangulation_depth: 300.0
 
+# Map Hyperparameters
 num_active_keyframes: 17
 
+# Backend Hyperparameters
+
+
+# Dataset
+dataset_dir: ./data/dataset/sequences/05
 left_cam_index: 0
 right_cam_index: 1
 is_color_input: 0
 
+# Visualization
 visualizer_on: 1

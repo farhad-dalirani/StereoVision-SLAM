@@ -75,6 +75,7 @@ namespace slam
             int num_features_tracking_{50};
             int num_features_tracking_bad_{20};
             int num_features_needed_for_keyframe_{80};
+            double max_triangulation_depth_{300.0};
 
             // Keypoint feature Detector
             cv::Ptr<cv::GFTTDetector> gftt_;
