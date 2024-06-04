@@ -34,19 +34,34 @@ namespace slam
             throw SLAMException("Cannot initialize object to read dataset.");
         }
         
-        // Create components
+        // Create SLAM Pipeline components
+        
+        // Frontend
         frontend_ = std::make_shared<Frontend>();
+        
+        // Backend
         if(Config::Get<int>("backend_on") >= 1)
         {
             backend_ = std::make_shared<Backend>();
         }
+
+        // Loop Closure
+        if(Config::Get<int>("loopclosure_on") >= 1)
+        {
+            loopclosure_ = std::make_shared<LoopClosure>();
+        }
+
+        // Map
         map_ = std::make_shared<Map>();
+        
+        // Visualizer
         if(Config::Get<int>("visualizer_on") >= 1)
         {
             viewer_ = std::make_shared<Viewer>();
         }
 
         frontend_->SetBackend(backend_);
+        frontend_->SetLoopClosure(loopclosure_);
         frontend_->SetMap(map_);
         frontend_->SetViewer(viewer_);
         frontend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
@@ -56,6 +71,13 @@ namespace slam
             backend_->SetMap(map_);
             backend_->SetViewer(viewer_);
             backend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+        }
+
+        if(loopclosure_)
+        {
+            loopclosure_->SetMap(map_);
+            loopclosure_->SetViewer(viewer_);
+            loopclosure_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
         }
 
         if(viewer_)
@@ -117,10 +139,15 @@ namespace slam
             }
         }
         
-        // Stop other components
+        // Stop components of stereo visual slam pipeline
         if(backend_)
         {
             backend_->Stop();
+        }
+
+        if(loopclosure_)
+        {
+            loopclosure_->Stop();
         }
 
         if(viewer_)

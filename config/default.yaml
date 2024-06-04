@@ -17,6 +17,9 @@ num_active_keyframes: 17
 backend_on: 1
 chi2_th: 5.991
 
+# Loop Closure
+loopclosure_on: 1
+
 # Dataset
 dataset_dir: ./data/dataset/sequences/05
 left_cam_index: 0

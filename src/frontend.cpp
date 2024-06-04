@@ -695,6 +695,11 @@ namespace slam
         backend_ = backend;
     }
 
+    void Frontend::SetLoopClosure(std::shared_ptr<LoopClosure> loopclosure)
+    {
+        loopclosure_ = loopclosure;
+    }
+
     void Frontend::SetViewer(std::shared_ptr<Viewer> viewer)
     {
         viewer_ = viewer;

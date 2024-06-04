@@ -7,6 +7,7 @@
 #include<StereoVisionSLAM/map.h>
 #include<StereoVisionSLAM/camera.h>
 #include<StereoVisionSLAM/backend.h>
+#include<StereoVisionSLAM/loopclosure.h>
 #include<StereoVisionSLAM/viewer.h>
 #include <opencv2/features2d.hpp>
 
@@ -14,6 +15,7 @@ namespace slam
 {
 
     class Backend;
+    class LoopClosure;
     class Viewer;
 
     enum class FrontendStatus { INITING, TRACKING_GOOD, TRACKING_BAD, LOST };
@@ -33,6 +35,7 @@ namespace slam
             Frontend();
             void SetMap(Map::Ptr map);
             void SetBackend(std::shared_ptr<Backend> backend);
+            void SetLoopClosure(std::shared_ptr<LoopClosure> loopclosure);
             void SetViewer(std::shared_ptr<Viewer> viewer);
             void SetCameras(Camera::Ptr left, Camera::Ptr right);
             FrontendStatus GetStatus() const;
@@ -54,6 +57,7 @@ namespace slam
 
             Map::Ptr map_{nullptr};
             std::shared_ptr<Backend> backend_{nullptr};
+            std::shared_ptr<LoopClosure> loopclosure_{nullptr};
             std::shared_ptr<Viewer> viewer_{nullptr};
 
             /* The relative motion between the current frame and 
