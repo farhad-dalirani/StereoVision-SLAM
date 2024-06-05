@@ -19,6 +19,7 @@ chi2_th: 5.991
 
 # Loop Closure
 loopclosure_on: 1
+keyframes_to_ignore_after_loop: 6
 
 # Dataset
 dataset_dir: ./data/dataset/sequences/05

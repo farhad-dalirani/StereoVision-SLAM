@@ -26,6 +26,11 @@ namespace slam
             std::mutex pose_mutex_;
             // Left and right images in stereo system
             cv::Mat left_img_, right_img_;
+            /* Left image extracted feature vector
+             * representation by a neural network */
+            Eigen::Matrix<float, 1280, 1> representation_vec_;
+            bool has_rep_vec_{false};
+
             double time_stamp_;
 
             // Extracted features in left image
