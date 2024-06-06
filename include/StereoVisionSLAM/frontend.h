@@ -78,7 +78,11 @@ namespace slam
             int num_features_init_{100};
             int num_features_tracking_{50};
             int num_features_tracking_bad_{20};
+            /* If a track frame has less than this amount tracked keypoint features
+             * from previous frame, it marked as a keyframe */
             int num_features_needed_for_keyframe_{80};
+            /* A depth threshold for removing potential outlier 3d points in
+             * stereo sytem obtained by triangulation in left and right cameras */
             double max_triangulation_depth_{300.0};
 
             // Keypoint feature Detector
