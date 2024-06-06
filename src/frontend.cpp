@@ -592,6 +592,12 @@ namespace slam
             backend_->UpdateMap();
         }
 
+        if(loopclosure_)
+        {
+            // Add keyframe to loop clouser pipeline
+            loopclosure_->AddNewKeyFrame(current_frame_);
+        }
+
         if (viewer_)
         {
             viewer_->UpdateMap();

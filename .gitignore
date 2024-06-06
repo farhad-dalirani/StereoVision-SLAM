@@ -4,6 +4,7 @@ build/*
 bin/t*
 bin/run*
 lib/l*
+lib/s*
 todo
 app/test.cpp
 app/test2.cpp

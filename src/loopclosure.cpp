@@ -25,6 +25,9 @@ namespace slam
     {
         // Set hyperparameters
         keyframes_to_ignore_after_loop_ = Config::Get<int>("keyframes_to_ignore_after_loop");
+        potential_loop_weak_threshold_ = Config::Get<float>("potential_loop_weak_threshold");
+        potential_loop_strong_threshold_ = Config::Get<float>("potential_loop_strong_threshold");
+        max_num_weak_threshold_ = Config::Get<int>("max_num_weak_threshold");
 
         // Initialize Deep Neural Network for feature extraction from images
         InitialFeatureExtractorNetwork();
@@ -58,9 +61,24 @@ namespace slam
         /* Extract feature vector representation of left image of
          * a frame with the backbone neural network */
 
+        // Make sure image has 3 channel
+        cv::Mat dst;
+        if(dst.channels() == 1)
+        {
+            cv::cvtColor(frame->left_img_, dst, cv::COLOR_GRAY2RGB);
+        }
+        else
+        {
+            frame->left_img_.copyTo(dst);
+        }
+        
+        /* Blur image for extracting feature vector 
+         * with less sensivity to small changes */
+        cv::GaussianBlur(dst, dst, cv::Size(7, 7), 0);
+
         // Preprocess the image: resize, convert to blob, etc.
         cv::Mat blob;
-        cv::dnn::blobFromImage(frame->left_img_, blob, 1.0/255.0, cv::Size(224, 224), 
+        cv::dnn::blobFromImage(dst, blob, 1.0/255.0, cv::Size(224, 224), 
                                 cv::Scalar(0.485, 0.456, 0.406), true, false);
 
         // Set the input blob to the network
@@ -110,23 +128,123 @@ namespace slam
     bool LoopClosure::IsKeyframeInWaitingList()
     {
         // Return True if there are keyframes waiting to be check for loop
+
         std::unique_lock<std::mutex> lck(list_mutex_);
         return not(waitlist_keyframes_.empty());
     }
 
+    void LoopClosure::SetCurrentKeyframe()
+    {
+        // Extract most waited keyframe from waiting list
+        
+        std::unique_lock<std::mutex> lck(list_mutex_);
+        current_keyframe_ = waitlist_keyframes_.front();
+        waitlist_keyframes_.pop_front();
+    }
+
+    void LoopClosure::AddToProcessedKeyframes()
+    {
+        /* Adds the current keyframe with extracted features
+         * to the processed keyframes collection */
+        
+        std::unique_lock<std::mutex> lck(database_mutex_);
+        processed_keyframes_[current_keyframe_->keyframe_id_] = current_keyframe_;
+        last_keyframe_ = current_keyframe_;
+    }
+
+    bool LoopClosure::LoopKeyframeCandidate()
+    {
+        /* Uses comparision of deep feature vector representaion of whole image of 
+         * current frame and all previously processed keyframes to find a potential 
+         * loop candidate for current frame. */
+        
+        std::unique_lock<std::mutex> lck(database_mutex_);
+
+        candid_loop_keyframe_ = nullptr;
+
+        float max_similarity{0};
+        unsigned long max_similarity_kf_id{0};
+        int num_potential_candidate{0};
+
+        for(auto iter{processed_keyframes_.begin()}; iter != processed_keyframes_.end(); iter++)
+        {
+            // Ignore recent keyframes to current keyframes
+            if(current_keyframe_->keyframe_id_ - iter->first < 20)
+            {
+                continue;
+            }
+
+            // Calculate similarty
+            float similarity = SimilarityScore(current_keyframe_->representation_vec_,
+                                                 iter->second->representation_vec_);
+
+            if(similarity > max_similarity)
+            {
+                max_similarity = similarity;
+                max_similarity_kf_id = iter->first;
+            }
+            if(similarity > potential_loop_weak_threshold_)
+            {
+                ++num_potential_candidate;
+            }
+        }
+
+        /* If max similarity does not pass strong threshold for score or 
+         * there are to many similar keyframe with high matching score, 
+         * it means no potential loop candidate */
+        if((max_similarity < potential_loop_strong_threshold_) or (num_potential_candidate > max_num_weak_threshold_))
+        {
+            return false;
+        }
+
+        // Set candidate with potential for loop
+        candid_loop_keyframe_ = processed_keyframes_[max_similarity_kf_id];
+        return true;
+    }
+
     void LoopClosure::LoopClosureLoop()
     {
-        /* Running in another thread, constantly check new keyframes,
-         * if there is a loop detected, call loop closure pipeline to 
+        /* Running in separate thread, constantly check new keyframes,
+         * if a loop detected, call loop closure pipeline to 
          * correct camera poses and landmarks locations */
 
         while(loopclosure_running_.load())
         {
-            std::unique_lock<std::mutex> lock(database_mutex_);
-            
-            //
+            /* If there is no keyfram in waiting list,
+             * wait and try again */
+            if(not(IsKeyframeInWaitingList()))
+            {
+                usleep(1000);
+                continue;
+            }
 
+            // Choose a keyframe from waiting list
+            SetCurrentKeyframe();
             
+            // Calculate deep feature vector representation for left image
+            ExtractFeatureVec(current_keyframe_);
+            
+            bool lpop_detected{false};
+            
+            /* If a potential loop is detected, proceed to the
+             * next steps to check for the existence of a loop */
+            if(LoopKeyframeCandidate())
+            {
+                
+                
+            }
+
+
+
+
+            /* Add processed keyframe with extracted features for comparing
+             * future keyframe with it */
+            if(lpop_detected == false)
+            {
+                AddToProcessedKeyframes();
+            }
+
+            usleep(1000);
         }
     }
 

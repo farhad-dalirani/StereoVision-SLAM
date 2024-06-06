@@ -26,7 +26,9 @@ namespace slam
             void SetMap(std::shared_ptr<Map> map);
             void SetViewer(std::shared_ptr<Viewer> viewer);
             void SetCameras(Camera::Ptr left, Camera::Ptr right);
-
+            // Add a new keyframe to a queue to be process by loop closure pipeline
+            void AddNewKeyFrame(Frame::Ptr new_keyframe);
+            
         private:
             // Create deep neural netwrok to map a image to a feature vector 
             void InitialFeatureExtractorNetwork();
@@ -35,13 +37,15 @@ namespace slam
             // Calculate similarity score of deep representation of two images
             float SimilarityScore(const Eigen::Matrix<float, 1280, 1> &a, 
                                     const Eigen::Matrix<float, 1280, 1> &b);
-            // Add a new keyframe to a queue to be process by loop closure pipeline
-            void AddNewKeyFrame(Frame::Ptr new_keyframe);
             // Return True if there are keyframes waiting to be check for loop
             bool IsKeyframeInWaitingList();
-            /* Running in another thread, constantly check new keyframes,
-             * if there is a loop detected, call loop closure pipeline to 
-             * correct camera poses and landmarks locations */
+            // Select a keyframe to process by loop closure pipeline
+            void SetCurrentKeyframe();
+            // Adds the current keyframe to the processed keyframes collection
+            void AddToProcessedKeyframes();
+            // Use deep feature vector to find potential loop candidate
+            bool LoopKeyframeCandidate();
+            // Process new keyframes with Loop Closure pipeline
             void LoopClosureLoop();
 
 
@@ -74,8 +78,8 @@ namespace slam
              * by loop closure pipeline */
             std::list<Frame::Ptr> waitlist_keyframes_;
             /* Keyframes that their deep feature vector representation
-             * were calculated before and their loop closure situation
-             * were checked */
+             * and keypoint features were calculated before and their
+             * loop closure situation were checked */
             std::unordered_map<unsigned long, Frame::Ptr> processed_keyframes_;           
             
 
@@ -83,6 +87,9 @@ namespace slam
 
             /* If a loop was closed, ignore next n keyframe */
             int keyframes_to_ignore_after_loop_{6};
+            float potential_loop_weak_threshold_{0.92};
+            float potential_loop_strong_threshold_{0.95};
+            int max_num_weak_threshold_{3};
 
     };
 

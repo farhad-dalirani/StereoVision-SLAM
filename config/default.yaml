@@ -19,7 +19,10 @@ chi2_th: 5.991
 
 # Loop Closure
 loopclosure_on: 1
-keyframes_to_ignore_after_loop: 6
+keyframes_to_ignore_after_loop: 5
+potential_loop_weak_threshold: 0.92
+potential_loop_strong_threshold: 0.95
+max_num_weak_threshold: 3
 
 # Dataset
 dataset_dir: ./data/dataset/sequences/05
