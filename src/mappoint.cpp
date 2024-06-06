@@ -40,7 +40,12 @@ namespace slam
             if(iter->lock() == feature)
             {
                 observations_.erase(iter);
-                feature->map_point_.reset();
+                
+                if(feature->outlier_ == true)
+                {
+                    feature->map_point_.reset();
+                }
+
                 observed_times_--;
                 break;
             } 
