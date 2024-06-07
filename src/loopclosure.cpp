@@ -1,6 +1,8 @@
 #include<StereoVisionSLAM/loopclosure.h>
 #include<StereoVisionSLAM/visual_odometry.h>
+#include<StereoVisionSLAM/slamexception.h>
 #include "StereoVisionSLAM/config.h"
+#include <opencv2/features2d.hpp>
 
 namespace slam
 {
@@ -93,9 +95,39 @@ namespace slam
 
         // Normalization
 	    frame->representation_vec_ /= frame->representation_vec_.norm();
+    }
 
-        // Set the image has vector representation
-        frame->has_rep_vec_ = true;
+    void LoopClosure::ExtractKeypointsDescriptor(Frame::Ptr frame)
+    {
+        /* Extract descriptor for keypoint features to later use
+         * their discriptors for matching keypoints */
+
+        std::vector<cv::KeyPoint> keypoints;
+
+        // Distance to image edge for keypoint feature to have descriptor
+        float dis{32};
+
+        // Select non outlier and valid keypoint features
+        for(size_t i{0}; i < frame->feature_left_.size(); i++)
+        {
+            if(frame->feature_left_[i] and (frame->feature_left_[i]->outlier_==false))
+            {
+                if ((frame->feature_left_[i]->position_.pt.x > dis) and (frame->feature_left_[i]->position_.pt.x < (frame->left_img_.cols - dis)) and
+                    (frame->feature_left_[i]->position_.pt.y > dis) and (frame->feature_left_[i]->position_.pt.y < (frame->left_img_.rows - dis)))
+                {
+                    keypoints.push_back(frame->feature_left_[i]->position_);
+                    frame->desc_feat_indx.push_back(i);
+                }
+            }
+        }
+        
+        // Compute the descriptors
+        orb_descriptor_->compute(frame->left_img_, keypoints, frame->desctriptor_);
+
+        if(keypoints.size() != frame->desctriptor_.rows)
+        {
+            throw SLAMException("Number of calculated descriptors is not equal to number of keypoint features");
+        }
     }
 
     float LoopClosure::SimilarityScore(const Eigen::Matrix<float, 1280, 1> &a, 
@@ -224,7 +256,15 @@ namespace slam
             // Calculate deep feature vector representation for left image
             ExtractFeatureVec(current_keyframe_);
             
-            bool lpop_detected{false};
+            // Extract keypoint features descriptor
+            ExtractKeypointsDescriptor(current_keyframe_);
+            std::cout << std::endl;
+            std::cout << "===========================" << std::endl;
+            std::cout << current_keyframe_->desc_feat_indx.size() << std::endl;
+            std::cout << current_keyframe_->desctriptor_.rows << ", " << current_keyframe_->desctriptor_.cols;
+            std::cout << std::endl;
+
+            bool loop_detected{false};
             
             /* If a potential loop is detected, proceed to the
              * next steps to check for the existence of a loop */
@@ -239,7 +279,7 @@ namespace slam
 
             /* Add processed keyframe with extracted features for comparing
              * future keyframe with it */
-            if(lpop_detected == false)
+            if(loop_detected == false)
             {
                 AddToProcessedKeyframes();
             }
