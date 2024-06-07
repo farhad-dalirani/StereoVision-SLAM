@@ -26,17 +26,28 @@ namespace slam
             std::mutex pose_mutex_;
             // Left and right images in stereo system
             cv::Mat left_img_, right_img_;
-            /* Left image extracted feature vector
-             * representation by a neural network */
-            Eigen::Matrix<float, 1280, 1> representation_vec_;
-            bool has_rep_vec_{false};
-
+            
             double time_stamp_;
 
-            // Extracted features in left image
+            // Extracted keypoint features in left image
             std::vector<Feature::Ptr> feature_left_;
-            // Extracted features in right image, set to nullptr if no corresponding
+            /* Extracted keypoint features in right image, set to
+             * nullptr if no corresponding */
             std::vector<Feature::Ptr> feature_right_;
+
+            /* Left image extracted feature vector representation
+             * by a neural network. Just is used in loop 
+             * closure pipeline */
+            Eigen::Matrix<float, 1280, 1> representation_vec_;
+
+            /* ORB Descriptors for non-outlier left image keypoint features.
+             * Just used in loop closure pipeline */
+            cv::Mat desctriptor_;
+
+            /* Determine which row of desctriptor_ correspond 
+             * to which feature_left_. Just used in loop 
+             * closure pipeline */
+            std::vector<size_t> desc_feat_indx;
 
             Frame(){}
             Frame(long id, double time_stamp, const Sophus::SE3d &pose,
