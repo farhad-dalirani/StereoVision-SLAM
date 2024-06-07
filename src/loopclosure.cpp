@@ -286,6 +286,63 @@ namespace slam
         return false;
     }
 
+    bool LoopClosure::CalculatePose()
+    {
+        /* 
+        */
+
+        // Prepare 3D point and 2D keypoint feature
+        std::vector<cv::Point3f> points3d_cand;
+        std::vector<cv::Point2f> points2d_curr;
+        for(auto iter{KeypointMatches_.begin()}; iter != KeypointMatches_.end();)
+        {   
+            // Feature in current keyframe of loop closure pipeline
+            Feature::Ptr feat_curr = current_keyframe_->feature_left_[iter->second];
+
+            // Featue in candidate keyframe for loop
+            Feature::Ptr feat_cand = candid_loop_keyframe_->feature_left_[iter->first];
+
+            // map point that feature in candidate keyframe refer to
+            MapPoint::Ptr mp = feat_cand->map_point_.lock();
+
+            /* Check if there is 3D map point associated with feature, collect
+             * map point and corresponding feature in current keyframe */
+            if(mp)
+            {
+                Eigen::Vector3d mp_pos = mp->Pos();
+                points3d_cand.push_back(cv::Point3f(mp_pos(0), mp_pos(1), mp_pos(2)));
+                points2d_curr.push_back(feat_curr->position_.pt);
+
+                iter++;
+            }
+            else
+            {
+                // Remove from matches
+                iter = KeypointMatches_.erase(iter);
+            }
+        }
+
+        if(points3d_cand.size() < min_num_acceptable_keypoint_match_)
+        {
+            return false;
+        }
+
+        // Calculate pose of current keyframe in world coodinate with PnP Ransac
+        try
+        {
+    
+        }
+        catch(...)
+        {
+            return false;        
+        }
+        
+
+
+
+        return true;
+    }
+
     void LoopClosure::LoopClosureLoop()
     {
         /* Running in separate thread, constantly check new keyframes,
@@ -321,10 +378,15 @@ namespace slam
                  * the potential keyframe candidate exist, proceed */
                 if(KeypointMatchWithLoopCandid())
                 {
-                    
+                    if(CalculatePose())
+                    {
+                        // Set a loop detected
+                        loop_detected = true;
+                        last_closed_keyframe_ = current_keyframe_;
 
-                    loop_detected = true;
-                    last_closed_keyframe_ = last_keyframe_;
+                        //
+                        std::cout << current_keyframe_->keyframe_id_ << ", " << candid_loop_keyframe_->keyframe_id_ << std::endl;
+                    }
                 }
             }
 
@@ -348,7 +410,5 @@ namespace slam
         loopclosure_running_.store(false);
         loopclosure_thread_.join();
     }
-
-    
 
 }

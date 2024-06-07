@@ -50,6 +50,9 @@ namespace slam
             /* Check if a good keypoint feature mathcing between keypoint
              * of current frame and candidate frame for loop exist */
             bool KeypointMatchWithLoopCandid();
+            /* 
+             * */
+            bool CalculatePose();
             // Process new keyframes with Loop Closure pipeline
             void LoopClosureLoop();
 
