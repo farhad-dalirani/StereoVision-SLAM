@@ -111,7 +111,10 @@ namespace slam
         int num_good_pts{0};
         for(size_t i{0}; i < status.size(); ++i)
         {
-            if(status[i])
+            if(status[i] and (kps_right[i].y >= 0) and
+                 (kps_right[i].y < current_frame_->right_img_.rows) and
+                    (kps_right[i].x >= 0) and
+                     (kps_right[i].x < current_frame_->right_img_.cols))
             {
                 cv::KeyPoint kp_i(kps_right[i], 7);
                 Feature::Ptr feat = std::make_shared<Feature>(current_frame_, kp_i);
@@ -352,6 +355,14 @@ namespace slam
         {
             if(status[i])
             {
+                
+                // Ignore if track point is outside of current frame left image
+                if((kps_current[i].y < 0) or (kps_current[i].y >= current_frame_->left_img_.rows) or
+                     (kps_current[i].x < 0) or (kps_current[i].x >= current_frame_->left_img_.cols))
+                {
+                    continue;
+                }
+
                 // Create feature and add to current frame left image features
                 cv::KeyPoint kp(kps_current[i], 7);
                 Feature::Ptr feature = std::make_shared<Feature>(current_frame_, kp);
