@@ -34,7 +34,7 @@ namespace slam
         keyframe_id_ = keyframe_factory_id++;
     }
 
-        Frame& Frame::operator=(const Frame& other) 
+    Frame& Frame::operator=(const Frame& other) 
     {
         // Check for self-assignment
         if (this != &other) 

@@ -103,28 +103,37 @@ namespace slam
          * their discriptors for matching keypoints */
 
         std::vector<cv::KeyPoint> keypoints;
-
+        
         // Distance to image edge for keypoint feature to have descriptor
-        float dis{32};
+        float dis{20};
 
         // Select non outlier and valid keypoint features
         for(size_t i{0}; i < frame->feature_left_.size(); i++)
         {
             if(frame->feature_left_[i] and (frame->feature_left_[i]->outlier_==false))
             {
-                if ((frame->feature_left_[i]->position_.pt.x > dis) and (frame->feature_left_[i]->position_.pt.x < (frame->left_img_.cols - dis)) and
-                    (frame->feature_left_[i]->position_.pt.y > dis) and (frame->feature_left_[i]->position_.pt.y < (frame->left_img_.rows - dis)))
-                {
-                    keypoints.push_back(frame->feature_left_[i]->position_);
-                    frame->desc_feat_indx.push_back(i);
-                }
+                keypoints.push_back(frame->feature_left_[i]->position_); 
             }
         }
         
         // Compute the descriptors
-        orb_descriptor_->compute(frame->left_img_, keypoints, frame->desctriptor_);
+        orb_descriptor_->compute(frame->left_img_, keypoints, frame->descriptor_);
 
-        if(keypoints.size() != frame->desctriptor_.rows)
+        // Find which keypoint belong to which descriptor
+        for(size_t i{0}; i < keypoints.size(); i++)
+        {
+            for(size_t j{0}; j < frame->feature_left_.size(); j++)
+            {
+                if((frame->feature_left_[j]->position_.pt.x == keypoints[i].pt.x) and 
+                        (frame->feature_left_[j]->position_.pt.y == keypoints[i].pt.y))
+                {
+                    frame->desc_feat_indx_.push_back(j);
+                    break;
+                }   
+            }
+        }        
+        
+        if(frame->desc_feat_indx_.size() != frame->descriptor_.rows)
         {
             throw SLAMException("Number of calculated descriptors is not equal to number of keypoint features");
         }
@@ -258,11 +267,6 @@ namespace slam
             
             // Extract keypoint features descriptor
             ExtractKeypointsDescriptor(current_keyframe_);
-            std::cout << std::endl;
-            std::cout << "===========================" << std::endl;
-            std::cout << current_keyframe_->desc_feat_indx.size() << std::endl;
-            std::cout << current_keyframe_->desctriptor_.rows << ", " << current_keyframe_->desctriptor_.cols;
-            std::cout << std::endl;
 
             bool loop_detected{false};
             

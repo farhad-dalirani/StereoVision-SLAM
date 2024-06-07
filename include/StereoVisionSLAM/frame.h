@@ -42,12 +42,12 @@ namespace slam
 
             /* ORB Descriptors for non-outlier left image keypoint features.
              * Just used in loop closure pipeline */
-            cv::Mat desctriptor_;
+            cv::Mat descriptor_;
 
             /* Determine which row of desctriptor_ correspond 
              * to which feature_left_. Just used in loop 
              * closure pipeline */
-            std::vector<size_t> desc_feat_indx;
+            std::vector<size_t> desc_feat_indx_;
 
             Frame(){}
             Frame(long id, double time_stamp, const Sophus::SE3d &pose,
