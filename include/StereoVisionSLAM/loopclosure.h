@@ -34,6 +34,8 @@ namespace slam
             void InitialFeatureExtractorNetwork();
             // Extract feature representation of image by the backbone
             void ExtractFeatureVec(Frame::Ptr frame);
+            // Extract descriptor for keypoints features
+            void ExtractKeypointsDescriptor(Frame::Ptr frame);
             // Calculate similarity score of deep representation of two images
             float SimilarityScore(const Eigen::Matrix<float, 1280, 1> &a, 
                                     const Eigen::Matrix<float, 1280, 1> &b);
@@ -45,6 +47,9 @@ namespace slam
             void AddToProcessedKeyframes();
             // Use deep feature vector to find potential loop candidate
             bool LoopKeyframeCandidate();
+            /* Check if a good keypoint feature mathcing between keypoint
+             * of current frame and candidate frame for loop exist */
+            bool KeypointMatchWithLoopCandid();
             // Process new keyframes with Loop Closure pipeline
             void LoopClosureLoop();
 
@@ -63,6 +68,11 @@ namespace slam
             /* Deep Neural Network vision backbone for extracting 
              * feature vector from images */
             cv::dnn::Net network_;
+            // ORB keypoint feature descriptor
+            cv::Ptr<cv::ORB> orb_descriptor_ = cv::ORB::create(400);
+            // Keypoint feature matcher
+            cv::Ptr<cv::DescriptorMatcher> matcher_ = 
+                    cv::DescriptorMatcher::create("BruteForce-Hamming");
 
             // Most recent keyframe in Loop Closure pipeline
             Frame::Ptr current_keyframe_{nullptr};
@@ -73,13 +83,18 @@ namespace slam
             /* The candidate keyframe that is considered to create a loop with 
              * the current keyframe */
             Frame::Ptr candid_loop_keyframe_{nullptr};
+            /* Index of left image keypoint features in 
+             * current keyframe and their correspondance in
+             * loop candidate keyframe */
+            std::set<std::pair<size_t, size_t>> KeypointMatches_;
 
             /* A list of keyframes that are waiting be processed
              * by loop closure pipeline */
             std::list<Frame::Ptr> waitlist_keyframes_;
             /* Keyframes that their deep feature vector representation
              * and keypoint features were calculated before and their
-             * loop closure situation were checked */
+             * loop closure situation were checked.
+             * (index in keyframe candidate for loop, index in current keyframe) */
             std::unordered_map<unsigned long, Frame::Ptr> processed_keyframes_;           
             
 
@@ -90,7 +105,10 @@ namespace slam
             float potential_loop_weak_threshold_{0.92};
             float potential_loop_strong_threshold_{0.95};
             int max_num_weak_threshold_{3};
-
+            /* Minimum number of corresponding keypoints in
+             * current keyframe and a candidate keyframe for loop closure
+             * to count the candidate as a successful loop */
+            int min_num_acceptable_keypoint_match_{11};
     };
 
 }

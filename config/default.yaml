@@ -18,12 +18,12 @@ num_features_tracking_bad: 20
 num_features_needed_for_keyframe: 80
 max_triangulation_depth: 300.0
 # GFTT, ORB
-keypoint_feature_detector: ORB
+keypoint_feature_detector: GFTT
 
 #######################################################
 # Map Hyperparameters
 #######################################################
-num_active_keyframes: 17
+num_active_keyframes: 10
 
 #######################################################
 # Backend Hyperparameters
@@ -39,6 +39,7 @@ keyframes_to_ignore_after_loop: 5
 potential_loop_weak_threshold: 0.92
 potential_loop_strong_threshold: 0.95
 max_num_weak_threshold: 3
+min_num_acceptable_keypoint_match: 11
 
 #######################################################
 # Visualization

@@ -30,6 +30,7 @@ namespace slam
         potential_loop_weak_threshold_ = Config::Get<float>("potential_loop_weak_threshold");
         potential_loop_strong_threshold_ = Config::Get<float>("potential_loop_strong_threshold");
         max_num_weak_threshold_ = Config::Get<int>("max_num_weak_threshold");
+        min_num_acceptable_keypoint_match_ = Config::Get<int>("min_num_acceptable_keypoint_match");
 
         // Initialize Deep Neural Network for feature extraction from images
         InitialFeatureExtractorNetwork();
@@ -243,6 +244,48 @@ namespace slam
         return true;
     }
 
+    bool LoopClosure::KeypointMatchWithLoopCandid()
+    {
+        /* Match keypoint in current keyframe and the candidate
+         * keyframe for loop. Return true if enough match was found. */
+        
+        KeypointMatches_.clear();
+
+        // Match keypoints 
+        std::vector<cv::DMatch> matches;
+        matcher_->match(candid_loop_keyframe_->descriptor_, 
+                        current_keyframe_->descriptor_, 
+                        matches);
+
+        // Find match with smallest distance between keypoints descriptors
+        auto min_elm = std::min_element(matches.begin(), matches.end());
+        
+        // Threshold for reject bad matches
+        double distance_threshold = std::max(2 * min_elm->distance, 30.0f);
+        
+        // Discard bad matches
+        for(auto &match: matches)
+        {
+            if(match.distance > distance_threshold)
+            {
+                continue;
+            }
+
+            // index on corresponding features
+            std::pair<size_t, size_t> corres{
+                candid_loop_keyframe_->desc_feat_indx_[match.queryIdx],
+                current_keyframe_->desc_feat_indx_[match.trainIdx]};
+            KeypointMatches_.insert(corres);
+        }
+
+        if(KeypointMatches_.size() >= min_num_acceptable_keypoint_match_)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     void LoopClosure::LoopClosureLoop()
     {
         /* Running in separate thread, constantly check new keyframes,
@@ -274,8 +317,15 @@ namespace slam
              * next steps to check for the existence of a loop */
             if(LoopKeyframeCandidate())
             {
-                
-                
+                /* If a good mathcing between current keyframe and 
+                 * the potential keyframe candidate exist, proceed */
+                if(KeypointMatchWithLoopCandid())
+                {
+                    
+
+                    loop_detected = true;
+                    last_closed_keyframe_ = last_keyframe_;
+                }
             }
 
 
