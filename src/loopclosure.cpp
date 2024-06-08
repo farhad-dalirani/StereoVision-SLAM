@@ -24,6 +24,11 @@ namespace slam
         viewer_ = viewer;
     }
 
+    void LoopClosure::SetBackend(std::shared_ptr<Backend> backend)
+    {
+        backend_ = backend;
+    }
+
     LoopClosure::LoopClosure()
     {
         // Set hyperparameters
@@ -42,7 +47,7 @@ namespace slam
 
         // Initialize backend optimization in a seprate thread
         loopclosure_running_.store(true);
-        loopclosure_thread_ = std::thread(std::bind(&LoopClosure::LoopClosureLoop, this));
+        loopclosure_thread_ = std::thread(std::bind(&LoopClosure::LoopClosurePipeline, this));
     }
 
     void LoopClosure::InitialFeatureExtractorNetwork()
@@ -388,7 +393,42 @@ namespace slam
         return true;
     }
 
-    void LoopClosure::LoopClosureLoop()
+    void LoopClosure::LoopClosureUpdate()
+    {
+        /* */
+
+        /* If current keyframe pose and its new calulated value similar, 
+         * no correction required */
+        if(need_correction_ == false)
+        {
+            return;
+        }    
+
+        // Pause Backend optimization during loop closure correction
+        {
+            Backend::Ptr bk = backend_.lock();
+            if(bk)
+            {
+                bk->Pause();
+            }
+        }
+
+        usleep(2000000); 
+
+
+        
+        // Resume Backend optimization
+        {
+            Backend::Ptr bk = backend_.lock();
+            if(bk)
+            {
+                bk->Resume();
+            }
+        }
+
+    }
+
+    void LoopClosure::LoopClosurePipeline()
     {
         /* Running in separate thread, constantly check new keyframes,
          * if a loop detected, call loop closure pipeline to 
@@ -436,7 +476,8 @@ namespace slam
                         // Update last closed keyframe
                         last_closed_keyframe_ = current_keyframe_;
                         
-                        
+                        // Refine pose of keypoints and position of landmarks
+                        LoopClosureUpdate();
 
                     }
                 }

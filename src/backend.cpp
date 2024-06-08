@@ -58,6 +58,7 @@ namespace slam
 
             vertices.insert({kf->keyframe_id_, vertex_pose});
         }
+        max_keyframe_id_in_pipeline_ = max_kf_id;
 
         // Camera intrinsic parameter
         Eigen::Matrix3d K_left = cam_left_->K();
@@ -207,7 +208,7 @@ namespace slam
         if(viewer_)
         {
             viewer_->LogInfoMKF("Backend: Outlier/Inlier in optimization " + 
-                            std::to_string(cnt_outlier) + "/" + std::to_string(cnt_inlier), max_kf_id);
+                            std::to_string(cnt_outlier) + "/" + std::to_string(cnt_inlier), max_keyframe_id_in_pipeline_);
         }
 
         // Update keyframes' pose and landmarks' position with optimized vaules 
@@ -225,8 +226,8 @@ namespace slam
     void Backend::BackendLoop()
     {
         /* Continously waits for a signal to run the backend
-         * optimization as requested. It only apply bounle adjustment optimization
-         * on active key frames and active landmarks */
+         * optimization as requested. It only apply bounle adjustment 
+         * optimization on active key frames and active landmarks */
         while(backend_running_.load())
         {
             std::unique_lock<std::mutex> lock(data_mutex_);
@@ -238,6 +239,22 @@ namespace slam
             Map::KeyframesType active_kfs = map_->GetActiveKeyFrames();
             Map::LandmarksType active_landmarks = map_->GetActiveMapPoints();
             Optimize(active_kfs, active_landmarks);
+
+            // If a pause requested, pause backend
+            while (backend_pause_request_.load())
+            {
+                backend_paused_.store(true);
+                usleep(1000);
+            }
+            if(backend_paused_.load() == true)
+            {
+                backend_paused_.store(false);
+                if(viewer_)
+                {
+                    viewer_->LogInfoMKF("Backend: Resumed ", max_keyframe_id_in_pipeline_);
+                }
+            }
+
         }
         
     }
@@ -252,9 +269,38 @@ namespace slam
     void Backend::Stop() 
     {
         // Close backend optimization
+        backend_pause_request_.store(false);
+        backend_paused_.store(false);
         backend_running_.store(false);
         map_update_.notify_one();
         backend_thread_.join();
+        if(viewer_)
+        {
+            viewer_->LogInfoMKF("Backend: Stopped ", max_keyframe_id_in_pipeline_);
+        }
+    }
+
+    void Backend::Pause()
+    {
+        // Temporarly stop backend optimization
+
+        backend_pause_request_.store(true);
+
+        while(backend_paused_.load() == false)
+        {
+            usleep(1000);
+        }
+
+        if(viewer_)
+        {
+            viewer_->LogInfoMKF("Backend: Paused ", max_keyframe_id_in_pipeline_);
+        }
+    }
+
+    void Backend::Resume()
+    {
+        // Resume backend optimization
+        backend_pause_request_.store(false);
     }
 
     Backend::Backend()
@@ -264,6 +310,8 @@ namespace slam
 
         // Initialize backend optimization in a seprate thread
         backend_running_.store(true);
+        backend_pause_request_.store(false);
+        backend_paused_.store(false);
         backend_thread_ = std::thread(std::bind(&Backend::BackendLoop, this));
     }
 

@@ -5,6 +5,7 @@
 #include "StereoVisionSLAM/map.h"
 #include "StereoVisionSLAM/camera.h"
 #include "StereoVisionSLAM/viewer.h"
+#include "StereoVisionSLAM/backend.h"
 #include <opencv2/dnn.hpp>
 
 namespace slam
@@ -25,6 +26,7 @@ namespace slam
             void Stop(); 
             void SetMap(std::shared_ptr<Map> map);
             void SetViewer(std::shared_ptr<Viewer> viewer);
+            void SetBackend(std::shared_ptr<Backend> backend);
             void SetCameras(Camera::Ptr left, Camera::Ptr right);
             // Add a new keyframe to a queue to be process by loop closure pipeline
             void AddNewKeyFrame(Frame::Ptr new_keyframe);
@@ -53,11 +55,15 @@ namespace slam
             /* Use keypoints and landmarks from looped keyframes
              * to calculate the current keyframe's pose. */
             bool CalculatePose();
+            /* After detecting loop, correct pose of keyframes and
+             * position of landmarks accordingly */
+            void LoopClosureUpdate();
             // Process new keyframes with Loop Closure pipeline
-            void LoopClosureLoop();
-
+            void LoopClosurePipeline();
+            
 
             Map::Ptr map_{nullptr};
+            std::weak_ptr<Backend> backend_;
             std::shared_ptr<Viewer> viewer_{nullptr};
             Camera::Ptr cam_left_{nullptr};
             Camera::Ptr cam_right_{nullptr};

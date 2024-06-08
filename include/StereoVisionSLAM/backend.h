@@ -30,7 +30,10 @@ namespace slam
             void UpdateMap();
             // Close backend optimization
             void Stop(); 
-
+            // Pause backend optimization
+            void Pause();
+            // Resume backend optimization
+            void Resume();
             void SetMap(std::shared_ptr<Map> map);
             void SetViewer(std::shared_ptr<Viewer> viewer);
             void SetCameras(Camera::Ptr left, Camera::Ptr right);
@@ -45,9 +48,14 @@ namespace slam
             
             std::condition_variable map_update_;
             std::atomic<bool> backend_running_;
+            std::atomic<bool> backend_pause_request_;
+            std::atomic<bool> backend_paused_;
             
             Camera::Ptr cam_left_{nullptr};
             Camera::Ptr cam_right_{nullptr};
+            
+            // Keyframe id of most recent keyframe in backend pipeline
+            unsigned long max_keyframe_id_in_pipeline_{0};
 
             // Robust Kernel threshold
             double chi2_th_{5.991};

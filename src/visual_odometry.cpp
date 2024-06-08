@@ -69,15 +69,25 @@ namespace slam
         if(backend_)
         {
             backend_->SetMap(map_);
-            backend_->SetViewer(viewer_);
             backend_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+            if(viewer_)
+            {
+                backend_->SetViewer(viewer_);
+            }
         }
 
         if(loopclosure_)
         {
             loopclosure_->SetMap(map_);
-            loopclosure_->SetViewer(viewer_);
             loopclosure_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+            if(backend_)
+            {
+                loopclosure_->SetBackend(backend_);
+            }
+            if(viewer_)
+            {
+                loopclosure_->SetViewer(viewer_);
+            }
         }
 
         if(viewer_)
