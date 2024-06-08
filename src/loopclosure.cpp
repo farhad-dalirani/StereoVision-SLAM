@@ -365,6 +365,25 @@ namespace slam
         
         // Corrected pose of current frame
         current_frame_corrected_pose_ = cam_left_->pose_.inverse() * Sophus::SE3d(R, t);
+        
+        // Transformation from loop keyframe to current keyframe new pose
+        relative_pose_ = current_frame_corrected_pose_ * candid_loop_keyframe_->Pose().inverse();
+
+        /* If new calculated pose of current keyframe is similar to 
+         * previous value of pose, there is no need for path optimization
+         * and updating pose of other keyframes */ 
+        double pose_diff = (current_keyframe_->Pose() *
+                                current_frame_corrected_pose_.inverse()).log().norm();
+
+        if(pose_diff > 1)
+        {
+            need_correction_ = true;
+        }
+        else
+        {
+            need_correction_ = false;
+        }
+
 
         return true;
     }
@@ -395,7 +414,8 @@ namespace slam
             ExtractKeypointsDescriptor(current_keyframe_);
 
             bool loop_detected{false};
-            
+            candid_loop_keyframe_.reset();
+
             /* If a potential loop is detected, proceed to the
              * next steps to check for the existence of a loop */
             if(LoopKeyframeCandidate())
@@ -404,14 +424,20 @@ namespace slam
                  * the potential keyframe candidate exist, proceed */
                 if(KeypointMatchWithLoopCandid())
                 {
+                    /* Calculate correct pose of current keyframe by using   
+                     * information of loop. If number of inliers during calculating
+                     * pose is acceptable, a loop is confirmed */
                     if(CalculatePose())
                     {
                         // Set a loop detected
                         loop_detected = true;
+                        // Link current keyframe to loop keyframe
                         current_keyframe_->loop_keyframe_ = candid_loop_keyframe_;
+                        // Update last closed keyframe
                         last_closed_keyframe_ = current_keyframe_;
                         
                         
+
                     }
                 }
             }

@@ -92,6 +92,9 @@ namespace slam
             /* Corrected pose of current keyframe in world coordinate 
              * obtained by using new information after detecting a loop */
             Sophus::SE3d current_frame_corrected_pose_;
+            /* Transformation from detected loop keyframe to
+             * corrected pose of current keyframe */
+            Sophus::SE3d relative_pose_;
             /* If pose of current frame and its new pose after
              * detectiong a loop so similar, there is no need to
              * correct pose of keyframes */ 
