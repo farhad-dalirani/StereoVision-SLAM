@@ -50,8 +50,8 @@ namespace slam
             /* Check if a good keypoint feature mathcing between keypoint
              * of current frame and candidate frame for loop exist */
             bool KeypointMatchWithLoopCandid();
-            /* 
-             * */
+            /* Use keypoints and landmarks from looped keyframes
+             * to calculate the current keyframe's pose. */
             bool CalculatePose();
             // Process new keyframes with Loop Closure pipeline
             void LoopClosureLoop();
@@ -72,10 +72,9 @@ namespace slam
              * feature vector from images */
             cv::dnn::Net network_;
             // ORB keypoint feature descriptor
-            cv::Ptr<cv::ORB> orb_descriptor_ = cv::ORB::create(400);
+            cv::Ptr<cv::ORB> orb_descriptor_;
             // Keypoint feature matcher
-            cv::Ptr<cv::DescriptorMatcher> matcher_ = 
-                    cv::DescriptorMatcher::create("BruteForce-Hamming");
+            cv::Ptr<cv::DescriptorMatcher> matcher_;
 
             // Most recent keyframe in Loop Closure pipeline
             Frame::Ptr current_keyframe_{nullptr};
@@ -90,7 +89,13 @@ namespace slam
              * current keyframe and their correspondance in
              * loop candidate keyframe */
             std::set<std::pair<size_t, size_t>> KeypointMatches_;
-
+            /* Corrected pose of current keyframe in world coordinate 
+             * obtained by using new information after detecting a loop */
+            Sophus::SE3d current_frame_corrected_pose_;
+            /* If pose of current frame and its new pose after
+             * detectiong a loop so similar, there is no need to
+             * correct pose of keyframes */ 
+            bool need_correction_{true};
             /* A list of keyframes that are waiting be processed
              * by loop closure pipeline */
             std::list<Frame::Ptr> waitlist_keyframes_;

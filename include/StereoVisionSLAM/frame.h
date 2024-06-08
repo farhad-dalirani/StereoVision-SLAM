@@ -48,6 +48,8 @@ namespace slam
              * to which feature_left_. Just used in loop 
              * closure pipeline */
             std::vector<size_t> desc_feat_indx_;
+            // A pointer to the keyframe that forms a loop with this keyframe
+            std::weak_ptr<Frame> loop_keyframe_;
 
             Frame(){}
             Frame(long id, double time_stamp, const Sophus::SE3d &pose,

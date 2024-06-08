@@ -3,6 +3,7 @@
 #include<StereoVisionSLAM/slamexception.h>
 #include "StereoVisionSLAM/config.h"
 #include <opencv2/features2d.hpp>
+#include <opencv2/core/eigen.hpp>
 
 namespace slam
 {
@@ -31,6 +32,10 @@ namespace slam
         potential_loop_strong_threshold_ = Config::Get<float>("potential_loop_strong_threshold");
         max_num_weak_threshold_ = Config::Get<int>("max_num_weak_threshold");
         min_num_acceptable_keypoint_match_ = Config::Get<int>("min_num_acceptable_keypoint_match");
+
+        // Keypoint feature descriptor and matcher
+        orb_descriptor_ = cv::ORB::create(400);
+        matcher_ = cv::DescriptorMatcher::create("BruteForce-Hamming");
 
         // Initialize Deep Neural Network for feature extraction from images
         InitialFeatureExtractorNetwork();
@@ -288,8 +293,12 @@ namespace slam
 
     bool LoopClosure::CalculatePose()
     {
-        /* 
-        */
+        /* Use the left image's keypoint features of the current keyframe and 
+         * the landmarks associated with features in the left image of the keyframes
+         * that form a loop with the current keyframe to calculate the correct pose
+         * of the current keyframe.
+         */
+
 
         // Prepare 3D point and 2D keypoint feature
         std::vector<cv::Point3f> points3d_cand;
@@ -327,18 +336,35 @@ namespace slam
             return false;
         }
 
-        // Calculate pose of current keyframe in world coodinate with PnP Ransac
+        /* Calculate pose of current keyframe left camera 
+         * in world coodinate with PnP Ransac */
+        cv::Mat rot_vec, t_vec, R_cv, K;
+        cv::eigen2cv(cam_left_->K(), K);
+        std::vector<int> inliers; 
         try
         {
-    
+            cv::solvePnPRansac(points3d_cand, points2d_curr, K, cv::Mat(),
+                               rot_vec, t_vec, false, 100, 5.991, 0.99, inliers);
         }
         catch(...)
         {
             return false;        
         }
+
+        // Convert to Eigen rotation matrix and translation vector
+        Eigen::Matrix3d R;
+        Eigen::Vector3d t;
+        cv::Rodrigues(rot_vec, R_cv);
+        cv::cv2eigen(R_cv, R);
+        cv::cv2eigen(t_vec, t);
+
+        if(inliers.size() < min_num_acceptable_keypoint_match_)
+        {
+            return false;
+        }
         
-
-
+        // Corrected pose of current frame
+        current_frame_corrected_pose_ = cam_left_->pose_.inverse() * Sophus::SE3d(R, t);
 
         return true;
     }
@@ -382,10 +408,10 @@ namespace slam
                     {
                         // Set a loop detected
                         loop_detected = true;
+                        current_keyframe_->loop_keyframe_ = candid_loop_keyframe_;
                         last_closed_keyframe_ = current_keyframe_;
-
-                        //
-                        std::cout << current_keyframe_->keyframe_id_ << ", " << candid_loop_keyframe_->keyframe_id_ << std::endl;
+                        
+                        
                     }
                 }
             }
