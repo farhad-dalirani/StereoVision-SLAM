@@ -409,20 +409,35 @@ namespace slam
             Backend::Ptr bk = backend_.lock();
             if(bk)
             {
-                bk->Pause();
+                if(bk->IsRunning())
+                {
+                    bk->PauseRequest();
+
+                    while(not bk->IsPaused())
+                    {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    }
+
+                    if(viewer_)
+                    {
+                        viewer_->LogInfoMKF("Backend: Paused ", current_keyframe_->keyframe_id_);
+                    }
+                }
             }
         }
-
-        usleep(2000000); 
-
-
+        
+        //
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         
         // Resume Backend optimization
         {
             Backend::Ptr bk = backend_.lock();
             if(bk)
             {
-                bk->Resume();
+                if(bk->IsRunning())
+                {
+                    bk->Resume();
+                }
             }
         }
 
@@ -440,7 +455,7 @@ namespace slam
              * wait and try again */
             if(not(IsKeyframeInWaitingList()))
             {
-                usleep(1000);
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 continue;
             }
 
@@ -476,6 +491,15 @@ namespace slam
                         // Update last closed keyframe
                         last_closed_keyframe_ = current_keyframe_;
                         
+                        if(viewer_)
+                        {
+                            viewer_->LogInfoMKF(
+                                "Loop   : Loop Detected between keyframes " +
+                                 std::to_string(current_keyframe_->keyframe_id_) + 
+                                 std::string("/") + std::to_string(candid_loop_keyframe_->keyframe_id_),
+                            current_keyframe_->keyframe_id_);
+                        }
+
                         // Refine pose of keypoints and position of landmarks
                         LoopClosureUpdate();
 
@@ -493,7 +517,7 @@ namespace slam
                 AddToProcessedKeyframes();
             }
 
-            usleep(1000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 
@@ -502,6 +526,11 @@ namespace slam
         // Close loop closure optimization
         loopclosure_running_.store(false);
         loopclosure_thread_.join();
+
+        if(viewer_)
+        {
+            viewer_->LogInfoMKF("Loop   : Stopped ", current_keyframe_->keyframe_id_);
+        }
     }
 
 }

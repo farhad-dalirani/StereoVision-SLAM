@@ -2,7 +2,6 @@
 // Created by gaoxiang on 19-5-4.
 //
 #include "StereoVisionSLAM/visual_odometry.h"
-#include <chrono>
 #include "StereoVisionSLAM/config.h"
 #include "StereoVisionSLAM/slamexception.h"
 
@@ -150,14 +149,14 @@ namespace slam
         }
         
         // Stop components of stereo visual slam pipeline
-        if(backend_)
-        {
-            backend_->Stop();
-        }
-
         if(loopclosure_)
         {
             loopclosure_->Stop();
+        }
+        
+        if(backend_)
+        {
+            backend_->Stop();
         }
 
         if(viewer_)

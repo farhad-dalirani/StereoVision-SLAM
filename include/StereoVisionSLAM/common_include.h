@@ -14,6 +14,7 @@
 #include <thread>
 #include <condition_variable>
 #include <atomic>
+#include <chrono>
 
 /* Eigen Library for for linear algebra,
  * matrix and vector operations, geometrical 

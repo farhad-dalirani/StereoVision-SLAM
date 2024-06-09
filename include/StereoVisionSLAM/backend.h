@@ -30,8 +30,12 @@ namespace slam
             void UpdateMap();
             // Close backend optimization
             void Stop(); 
-            // Pause backend optimization
-            void Pause();
+            // Request pause of backend optimization
+            void PauseRequest();
+            // Check backend paused
+            bool IsPaused(); 
+            // Check backend running
+            bool IsRunning(); 
             // Resume backend optimization
             void Resume();
             void SetMap(std::shared_ptr<Map> map);

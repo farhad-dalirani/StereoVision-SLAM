@@ -230,8 +230,23 @@ namespace slam
          * optimization on active key frames and active landmarks */
         while(backend_running_.load())
         {
+
+            // If a pause requested, pause backend
+            while (backend_pause_request_.load())
+            {
+                backend_paused_.store(true);
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            if(backend_paused_.load() == true)
+            {
+                if(viewer_)
+                {
+                    viewer_->LogInfoMKF("Backend: Resumed ", max_keyframe_id_in_pipeline_);
+                }
+            }
+            backend_paused_.store(false);
+
             std::unique_lock<std::mutex> lock(data_mutex_);
-            
             // Wait untill a backend optimization requested
             map_update_.wait(lock);
 
@@ -239,21 +254,6 @@ namespace slam
             Map::KeyframesType active_kfs = map_->GetActiveKeyFrames();
             Map::LandmarksType active_landmarks = map_->GetActiveMapPoints();
             Optimize(active_kfs, active_landmarks);
-
-            // If a pause requested, pause backend
-            while (backend_pause_request_.load())
-            {
-                backend_paused_.store(true);
-                usleep(1000);
-            }
-            if(backend_paused_.load() == true)
-            {
-                backend_paused_.store(false);
-                if(viewer_)
-                {
-                    viewer_->LogInfoMKF("Backend: Resumed ", max_keyframe_id_in_pipeline_);
-                }
-            }
 
         }
         
@@ -269,9 +269,9 @@ namespace slam
     void Backend::Stop() 
     {
         // Close backend optimization
-        backend_pause_request_.store(false);
-        backend_paused_.store(false);
         backend_running_.store(false);
+        backend_pause_request_.store(false);
+        backend_paused_.store(true);
         map_update_.notify_one();
         backend_thread_.join();
         if(viewer_)
@@ -280,21 +280,22 @@ namespace slam
         }
     }
 
-    void Backend::Pause()
+    void Backend::PauseRequest()
     {
-        // Temporarly stop backend optimization
-
+        // Request pause of backend optimization
         backend_pause_request_.store(true);
+    }
 
-        while(backend_paused_.load() == false)
-        {
-            usleep(1000);
-        }
+    bool Backend::IsPaused()
+    {
+        // Check backend paused
+        return (backend_pause_request_.load() and backend_paused_.load());
+    }
 
-        if(viewer_)
-        {
-            viewer_->LogInfoMKF("Backend: Paused ", max_keyframe_id_in_pipeline_);
-        }
+    bool Backend::IsRunning()
+    {
+        // Check backen is running
+        return backend_running_.load();
     }
 
     void Backend::Resume()
