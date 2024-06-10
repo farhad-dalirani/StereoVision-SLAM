@@ -38,17 +38,18 @@ namespace slam
             void SetLoopClosure(std::shared_ptr<LoopClosure> loopclosure);
             void SetViewer(std::shared_ptr<Viewer> viewer);
             void SetCameras(Camera::Ptr left, Camera::Ptr right);
+            Frame::Ptr GetLastFrame();
             FrontendStatus GetStatus() const;
             // Update Frontend when new frame
             bool AddFrame(Frame::Ptr frame);
-
+        
         private:
 
             FrontendStatus status_{FrontendStatus::INITING};
             
             // Current input frame to track
             Frame::Ptr current_frame_{nullptr};
-            // Last frame 
+            // Last frame that was fed to Stereo Vision Pipeline
             Frame::Ptr last_frame_{nullptr};
             // Left camera of stereo system 
             Camera::Ptr camera_left_{nullptr};

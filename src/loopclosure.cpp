@@ -29,6 +29,11 @@ namespace slam
         backend_ = backend;
     }
 
+    void LoopClosure::SetFrontend(std::shared_ptr<Frontend> frontend)
+    {
+        frontend_ = frontend;
+    }
+
     LoopClosure::LoopClosure()
     {
         // Set hyperparameters
@@ -401,6 +406,9 @@ namespace slam
          * of the current keyframe obtained by loop detection.
          */
         
+        // Lock for avoiding conflict with frontend
+        std::unique_lock<std::mutex> lck(loop_closure_upd_);
+
         // Calculate correct pose of active keyframes after loop detection 
         std::unordered_map<unsigned long, Sophus::SE3d> corrected_poses;
         corrected_poses[current_keyframe_->keyframe_id_] = current_frame_corrected_pose_;
@@ -456,10 +464,27 @@ namespace slam
             mp_i->SetPos(pos_w);
         }
 
+        // Update pose of last frame that was fed to SLAM pipeline in frontend
+        Frame::Ptr frontend_lf = frontend_.lock()->GetLastFrame();
+        Sophus::SE3d T_f_c = frontend_lf->Pose() * (current_keyframe_->Pose().inverse());
+        bool is_front_lf_active_kf{false};
+
         // Replace active keyframes old pose with new pose
         for(auto &kf_i: map_->GetActiveKeyFrames())
         {
             kf_i.second->SetPose(corrected_poses.at(kf_i.first));
+            
+            if(frontend_lf->keyframe_id_ == kf_i.first)
+            {
+                is_front_lf_active_kf = true;
+            }
+        }
+        
+        // Continue - update last frame pose
+        if(is_front_lf_active_kf == false)
+        {
+            Sophus::SE3d T_f_w = T_f_c * current_frame_corrected_pose_; 
+            frontend_lf->SetPose(T_f_w);
         }
 
         /* Replace landmarks associated with current keyframe with map points 
@@ -509,6 +534,12 @@ namespace slam
 
         }
 
+        if(viewer_)
+        {
+            viewer_->LogInfoMKF(
+                "Loop   : Local path fusion done.",
+                current_keyframe_->keyframe_id_, "loopclosure");
+        }
 
     }
 
@@ -522,7 +553,7 @@ namespace slam
         {
             return;
         }    
-
+        
         // Pause Backend optimization during loop closure correction
         {
             Backend::Ptr bk = backend_.lock();

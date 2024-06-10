@@ -736,6 +736,12 @@ namespace slam
         camera_right_ = right;
     }
 
+    Frame::Ptr Frontend::GetLastFrame()
+    {
+        // Return the last frame that was fed to SLAM pipeline
+        return last_frame_;
+    }
+
     FrontendStatus Frontend::GetStatus() const
     {
         return status_;

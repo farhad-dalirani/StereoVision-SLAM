@@ -5,11 +5,13 @@
 #include "StereoVisionSLAM/map.h"
 #include "StereoVisionSLAM/camera.h"
 #include "StereoVisionSLAM/viewer.h"
+#include "StereoVisionSLAM/frontend.h"
 #include "StereoVisionSLAM/backend.h"
 #include <opencv2/dnn.hpp>
 
 namespace slam
 {
+    class Frontend;
     
     class LoopClosure
     {
@@ -27,9 +29,15 @@ namespace slam
             void SetMap(std::shared_ptr<Map> map);
             void SetViewer(std::shared_ptr<Viewer> viewer);
             void SetBackend(std::shared_ptr<Backend> backend);
+            void SetFrontend(std::shared_ptr<Frontend> frontend);
             void SetCameras(Camera::Ptr left, Camera::Ptr right);
             // Add a new keyframe to a queue to be process by loop closure pipeline
             void AddNewKeyFrame(Frame::Ptr new_keyframe);
+            
+            /* A lock for controlling update of landmarks' postion and 
+             * keyframes' pose after detecting a loop to avoid coflict 
+             * with frontend */ 
+            std::mutex loop_closure_upd_;
             
         private:
             // Create deep neural netwrok to map a image to a feature vector 
@@ -66,6 +74,7 @@ namespace slam
 
             Map::Ptr map_{nullptr};
             std::weak_ptr<Backend> backend_;
+            std::weak_ptr<Frontend> frontend_;
             std::shared_ptr<Viewer> viewer_{nullptr};
             Camera::Ptr cam_left_{nullptr};
             Camera::Ptr cam_right_{nullptr};
@@ -73,7 +82,7 @@ namespace slam
             std::thread loopclosure_thread_;
             std::mutex database_mutex_;
             std::mutex list_mutex_;
-            
+
             std::atomic<bool> loopclosure_running_;
             
             /* Deep Neural Network vision backbone for extracting 

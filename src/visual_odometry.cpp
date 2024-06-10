@@ -79,6 +79,7 @@ namespace slam
         {
             loopclosure_->SetMap(map_);
             loopclosure_->SetCameras(dataset_->GetCamera(0), dataset_->GetCamera(1));
+            loopclosure_->SetFrontend(frontend_);
             if(backend_)
             {
                 loopclosure_->SetBackend(backend_);
@@ -117,8 +118,20 @@ namespace slam
 
         auto t1 = std::chrono::steady_clock::now();
 
-        // Feed new frame to the stereo visual slam pipeline
-        bool success = frontend_->AddFrame(new_frame);
+        bool success;
+        {
+            if(loopclosure_)
+            {
+                std::unique_lock<std::mutex> lck(loopclosure_->loop_closure_upd_);
+                // Feed new frame to the stereo visual slam pipeline
+                success = frontend_->AddFrame(new_frame);
+            }
+            else
+            {
+                // Feed new frame to the stereo visual slam pipeline
+                success = frontend_->AddFrame(new_frame);
+            }
+        }
 
         auto t2 = std::chrono::steady_clock::now();
         auto time_used =
