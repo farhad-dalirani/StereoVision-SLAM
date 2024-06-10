@@ -50,6 +50,10 @@ namespace slam
             std::vector<size_t> desc_feat_indx_;
             // A pointer to the keyframe that forms a loop with this keyframe
             std::weak_ptr<Frame> loop_keyframe_;
+            /* Transformation from detected loop keyframe to
+             * corrected pose of this keyframe. Just used in loop 
+             * closure pipeline */
+            Sophus::SE3d loop_relative_pose_;
 
             Frame(){}
             Frame(long id, double time_stamp, const Sophus::SE3d &pose,

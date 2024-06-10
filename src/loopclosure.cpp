@@ -372,7 +372,8 @@ namespace slam
         current_frame_corrected_pose_ = cam_left_->pose_.inverse() * Sophus::SE3d(R, t);
         
         // Transformation from loop keyframe to current keyframe new pose
-        relative_pose_ = current_frame_corrected_pose_ * candid_loop_keyframe_->Pose().inverse();
+        current_keyframe_->loop_relative_pose_ = current_frame_corrected_pose_ * 
+                                                 candid_loop_keyframe_->Pose().inverse();
 
         /* If new calculated pose of current keyframe is similar to 
          * previous value of pose, there is no need for path optimization
@@ -391,6 +392,124 @@ namespace slam
 
 
         return true;
+    }
+
+    void LoopClosure::LocalFusion()
+    {
+        /* After detecting a loop, recalculate active keyframes'poses 
+         * and active landmarks' positions by leveraging new pose
+         * of the current keyframe obtained by loop detection.
+         */
+        
+        // Calculate correct pose of active keyframes after loop detection 
+        std::unordered_map<unsigned long, Sophus::SE3d> corrected_poses;
+        corrected_poses[current_keyframe_->keyframe_id_] = current_frame_corrected_pose_;
+        for(auto &kf_i: map_->GetActiveKeyFrames())
+        {
+            unsigned long kf_id_i = kf_i.first;
+            if(current_keyframe_->keyframe_id_ == kf_id_i)
+            {
+                continue;
+            }
+
+            // Transformation from Current keyframe to ative keyframe i
+            Sophus::SE3d T_i_c = kf_i.second->Pose() * (current_keyframe_->Pose().inverse()); 
+            // Corrected transformation from World to active keyframe i
+            Sophus::SE3d T_i_w = T_i_c * current_frame_corrected_pose_; 
+
+            corrected_poses[kf_id_i] = T_i_w;
+        }
+
+        // Calculate correct position of landmarks after loop detection
+        for(auto &mappoint_i: map_->GetActiveMapPoints())
+        {
+            MapPoint::Ptr mp_i = mappoint_i.second;
+
+            /* Find the oldest keyframe that has a 
+             * keypoint feature that point to the map point */
+            Frame::Ptr kf_old{nullptr};
+            for(auto &feat_i: mp_i->GetObs())
+            {
+                Feature::Ptr feat_first = feat_i.lock();
+                if(feat_first)
+                {
+                    if(feat_first->map_point_.lock())
+                    {
+                        kf_old = feat_first->frame_.lock();
+                        if(corrected_poses.find(kf_old->keyframe_id_) != corrected_poses.end())
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                kf_old.reset();
+            }
+
+            assert(kf_old != nullptr);
+
+            // Point in stereo system coordinate of 'kf_old' keyframe
+            Eigen::Vector3d pos_s =  kf_old->Pose() * mp_i->Pos();
+            // Find new position of point in world coordinate with corrected pose
+            Eigen::Vector3d pos_w = corrected_poses.at(kf_old->keyframe_id_).inverse() * pos_s;
+            // Set new postion of point
+            mp_i->SetPos(pos_w);
+        }
+
+        // Replace active keyframes old pose with new pose
+        for(auto &kf_i: map_->GetActiveKeyFrames())
+        {
+            kf_i.second->SetPose(corrected_poses.at(kf_i.first));
+        }
+
+        /* Replace landmarks associated with current keyframe with map points 
+         * associated with the other keyframe involved in detected loop */
+        for(auto &pair_i: KeypointMatches_)
+        {
+            // Index of corresponding keypoint features matches
+            size_t cur_kf_feat_idx{pair_i.second};
+            size_t loop_kf_feat_idx{pair_i.first};
+
+            // Map point associated with feature in loop keyframe
+            MapPoint::Ptr mp_loop = candid_loop_keyframe_->
+                                        feature_left_[loop_kf_feat_idx]->
+                                            map_point_.lock();
+
+            if(mp_loop)
+            {
+                // Map point associated with feature in current keyframe
+                MapPoint::Ptr mp_curr = current_keyframe_->
+                                        feature_left_[cur_kf_feat_idx]->
+                                            map_point_.lock();
+                
+                /* Replace map point linked to feature in current frame 
+                 * with map point of the feature in the other keyframe */
+                if(mp_curr)
+                {
+                    for(auto &observation_i: mp_curr->GetObs())
+                    {
+                        Feature::Ptr obs_i = observation_i.lock();
+                        if(obs_i)
+                        {
+                            mp_loop->AddObservation(obs_i);
+                            obs_i->map_point_ = mp_loop;
+                        }
+                    }
+                    // Remove the current keyframe point
+                    map_->RemoveLandmark(mp_curr);
+                }
+                else
+                {
+                    current_keyframe_->
+                                        feature_left_[cur_kf_feat_idx]->
+                                            map_point_ = mp_loop;
+                }
+
+            }
+
+        }
+
+
     }
 
     void LoopClosure::LoopClosureUpdate()
@@ -420,14 +539,17 @@ namespace slam
 
                     if(viewer_)
                     {
-                        viewer_->LogInfoMKF("Backend: Paused ", current_keyframe_->keyframe_id_);
+                        viewer_->LogInfoMKF("Backend: Paused ", 
+                                            current_keyframe_->keyframe_id_,
+                                            "backend");
                     }
                 }
             }
         }
         
-        //
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        /* Resolve conflict of frontend/backend with
+         * current keyframe after detecting loop */
+        LocalFusion();
         
         // Resume Backend optimization
         {
@@ -497,7 +619,7 @@ namespace slam
                                 "Loop   : Loop Detected between keyframes " +
                                  std::to_string(current_keyframe_->keyframe_id_) + 
                                  std::string("/") + std::to_string(candid_loop_keyframe_->keyframe_id_),
-                            current_keyframe_->keyframe_id_);
+                                current_keyframe_->keyframe_id_, "loopclosure");
                         }
 
                         // Refine pose of keypoints and position of landmarks
@@ -529,7 +651,9 @@ namespace slam
 
         if(viewer_)
         {
-            viewer_->LogInfoMKF("Loop   : Stopped ", current_keyframe_->keyframe_id_);
+            viewer_->LogInfoMKF("Loop   : Stopped ", 
+                                current_keyframe_->keyframe_id_, 
+                                "loopclosure");
         }
     }
 

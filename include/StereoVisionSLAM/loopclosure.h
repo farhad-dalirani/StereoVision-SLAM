@@ -55,6 +55,8 @@ namespace slam
             /* Use keypoints and landmarks from looped keyframes
              * to calculate the current keyframe's pose. */
             bool CalculatePose();
+            // Resolve conflict of closed loop and frontend/backend
+            void LocalFusion();
             /* After detecting loop, correct pose of keyframes and
              * position of landmarks accordingly */
             void LoopClosureUpdate();
@@ -93,14 +95,12 @@ namespace slam
             Frame::Ptr candid_loop_keyframe_{nullptr};
             /* Index of left image keypoint features in 
              * current keyframe and their correspondance in
-             * loop candidate keyframe */
+             * loop candidate keyframe. 
+             * (candid keyframe feature index, current keyframe feature index) */
             std::set<std::pair<size_t, size_t>> KeypointMatches_;
             /* Corrected pose of current keyframe in world coordinate 
              * obtained by using new information after detecting a loop */
             Sophus::SE3d current_frame_corrected_pose_;
-            /* Transformation from detected loop keyframe to
-             * corrected pose of current keyframe */
-            Sophus::SE3d relative_pose_;
             /* If pose of current frame and its new pose after
              * detectiong a loop so similar, there is no need to
              * correct pose of keyframes */ 
