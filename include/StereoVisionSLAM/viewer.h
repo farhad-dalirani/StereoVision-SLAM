@@ -31,10 +31,11 @@ namespace slam
             void UpdateMap();
 
             // Log in rerun viewer
-            void LogInfo(std::string msg);
+            void LogInfo(std::string msg, std::string log_type);
 
             // Log in rerun viewer with id of most recent active keyframe as index
-            void LogInfoMKF(std::string msg, unsigned long maxkeyframe_id);
+            void LogInfoMKF(std::string msg, unsigned long maxkeyframe_id,
+                             std::string log_type);
 
         private:
             
@@ -52,6 +53,13 @@ namespace slam
             std::unordered_map<unsigned long, MapPoint::Ptr> active_landmarks_;
 
             std::mutex viewer_data_mutex_;
+
+            // Different color for loging info of different components
+            std::unordered_map<std::string, rerun::Color> log_color{
+                {"vo", rerun::Color(255, 255, 255)}, 
+                {"frontend", rerun::Color(0, 255, 255)},
+                {"backend", rerun::Color(0, 255, 0)},
+                {"loopclosure", rerun::Color(255, 165, 0)}};
     };
 
 }

@@ -133,7 +133,7 @@ namespace slam
 
     }
 
-    void Viewer::LogInfo(std::string msg)
+    void Viewer::LogInfo(std::string msg, std::string log_type)
     {
         // Rerun log with current frame id as reference
         if(current_frame_)
@@ -144,10 +144,11 @@ namespace slam
         {
             rec.set_time_sequence("currentframe_id", 0);
         }
-        rec.log("world/log", rerun::TextLog(msg));
+        rec.log("world/log", rerun::TextLog(msg).with_color(log_color.at(log_type)));
     }
 
-    void Viewer::LogInfoMKF(std::string msg, unsigned long maxkeyframe_id)
+    void Viewer::LogInfoMKF(std::string msg, unsigned long maxkeyframe_id, 
+                            std::string log_type)
     {
         // Rerun log with given keyframe id
         if(current_frame_)
@@ -159,7 +160,7 @@ namespace slam
             rec.set_time_sequence("currentframe_id", 0);
         }
         rec.set_time_sequence("max_keyframe_id", maxkeyframe_id);
-        rec.log("world/log", rerun::TextLog(msg));
+        rec.log("world/log", rerun::TextLog(msg).with_color(log_color.at(log_type)));
     }
 
 

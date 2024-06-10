@@ -29,6 +29,17 @@ namespace slam
     
     }
 
+    void Map::RemoveLandmark(MapPoint::Ptr landmark)
+    {
+        // Remove a landmark from map
+
+        std::unique_lock<std::mutex> lck(data_mutex_);
+        size_t mappoint_id = landmark->id_;
+        
+        landmarks_.erase(mappoint_id);
+        active_landmarks_.erase(mappoint_id);
+    }
+
     void Map::InsertKeyFrame(Frame::Ptr frame)
     {
         current_frame_ = frame;

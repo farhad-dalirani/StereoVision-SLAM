@@ -62,7 +62,8 @@ namespace slam
         {
             viewer_->LogInfo(std::string("Frontend: Detect ") + 
                                 std::to_string(cnt_detected) +
-                                std::string(" new features"));
+                                std::string(" new features"),
+                            "frontend");
         }
 
         return cnt_detected;
@@ -132,7 +133,8 @@ namespace slam
         {
             viewer_->LogInfo(std::string("Frontend: Find ") +
                             std::to_string(num_good_pts) + 
-                            std::string(" in the right image"));
+                            std::string(" in the right image"),
+                            "frontend");
         }
 
         return num_good_pts;
@@ -204,7 +206,8 @@ namespace slam
         {
             viewer_->LogInfo(std::string("Frontend: Initial map created with ") + 
                          std::to_string(cnt_init_landmarks) + 
-                         std::string(" map points"));
+                         std::string(" map points"),
+                         "frontend");
         }
 
         return true;
@@ -306,7 +309,8 @@ namespace slam
         {
             viewer_->LogInfo(std::string("Frontend: ") +
                          std::to_string(cnt_triangulated_pts) +
-                         std::string(" new landmarks by triangulation"));
+                         std::string(" new landmarks by triangulation"),
+                         "frontend");
         }
         
         return cnt_triangulated_pts;
@@ -377,7 +381,8 @@ namespace slam
         {
             viewer_->LogInfo(std::string("Frontend: Tracked ") + 
                          std::to_string(num_good_pts) +
-                         std::string(" from the last image"));
+                         std::string(" from the last image"),
+                         "frontend");
         }
 
         return num_good_pts;
@@ -522,7 +527,8 @@ namespace slam
         {
             viewer_->LogInfo(std::string("Frontend: Outlier/Inlier in pose estimating: ") +
                             std::to_string(cnt_outlier) + "/" + 
-                            std::to_string(features.size() - cnt_outlier));
+                            std::to_string(features.size() - cnt_outlier),
+                            "frontend");
         }
 
         // Set pose of current frame
@@ -585,7 +591,8 @@ namespace slam
             viewer_->LogInfo(std::string("Frontend: Set frame ") + 
                                 std::to_string(current_frame_->id_) + 
                                 std::string(" as keyframe ") + 
-                                std::to_string(current_frame_->keyframe_id_));
+                                std::to_string(current_frame_->keyframe_id_),
+                                "frontend");
         }
 
         SetObservationsForKeyFrame();
@@ -697,7 +704,8 @@ namespace slam
     {
         if(viewer_)
         {
-            viewer_->LogInfo(std::string("Frontend: Reset is not implemented"));
+            viewer_->LogInfo(std::string("Frontend: Reset is not implemented"), 
+                            "frontend");
         }
         return true;
     }

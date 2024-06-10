@@ -208,7 +208,9 @@ namespace slam
         if(viewer_)
         {
             viewer_->LogInfoMKF("Backend: Outlier/Inlier in optimization " + 
-                            std::to_string(cnt_outlier) + "/" + std::to_string(cnt_inlier), max_keyframe_id_in_pipeline_);
+                            std::to_string(cnt_outlier) + "/" + std::to_string(cnt_inlier),
+                            max_keyframe_id_in_pipeline_,
+                            "backend");
         }
 
         // Update keyframes' pose and landmarks' position with optimized vaules 
@@ -241,7 +243,10 @@ namespace slam
             {
                 if(viewer_)
                 {
-                    viewer_->LogInfoMKF("Backend: Resumed ", max_keyframe_id_in_pipeline_);
+                    viewer_->LogInfoMKF("Backend: Resumed ",
+                                        max_keyframe_id_in_pipeline_,
+                                        "backend"
+                                        );
                 }
             }
             backend_paused_.store(false);
@@ -276,7 +281,9 @@ namespace slam
         backend_thread_.join();
         if(viewer_)
         {
-            viewer_->LogInfoMKF("Backend: Stopped ", max_keyframe_id_in_pipeline_);
+            viewer_->LogInfoMKF("Backend: Stopped ", 
+                                max_keyframe_id_in_pipeline_,
+                                "backend");
         }
     }
 

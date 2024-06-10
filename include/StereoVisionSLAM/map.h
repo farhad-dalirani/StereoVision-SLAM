@@ -20,6 +20,8 @@ namespace slam
             // Clean up the points with zero observations from active
             // landmarks of the map
             void CleanMap();
+            // Remove a landmark from map
+            void RemoveLandmark(MapPoint::Ptr landmark);
 
             // Add new keyframe
             void InsertKeyFrame(Frame::Ptr frame);

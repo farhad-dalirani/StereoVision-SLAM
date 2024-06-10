@@ -111,7 +111,8 @@ namespace slam
 
         if(viewer_)
         {
-            viewer_->LogInfo(std::string("VO         : new frame process is running"));
+            viewer_->LogInfo(
+                std::string("VO         : new frame process is running"), "vo");
         }
 
         auto t1 = std::chrono::steady_clock::now();
@@ -127,7 +128,8 @@ namespace slam
         {
             viewer_->LogInfo(std::string("VO        : new frame process cost time ") + 
                          std::to_string(time_used.count()) + 
-                         std::string(" seconds"));
+                         std::string(" seconds"),
+                         "vo");
         }
 
         return success;
