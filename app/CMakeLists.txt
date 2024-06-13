@@ -1,2 +1,2 @@
-add_executable(run_kitti_stereo_vision_SLAM run_kitti_stereo_vision_SLAM.cpp)
-target_link_libraries(run_kitti_stereo_vision_SLAM StereoVisionSLAM ${THIRD_PARTY_LIBS})
+add_executable(run_stereo_visual_SLAM run_stereo_vision_SLAM.cpp)
+target_link_libraries(run_stereo_visual_SLAM StereoVisionSLAM ${THIRD_PARTY_LIBS})
