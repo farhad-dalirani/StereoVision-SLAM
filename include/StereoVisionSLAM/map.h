@@ -50,8 +50,9 @@ namespace slam
 
             Frame::Ptr current_frame_{nullptr};
 
-            // Hyper-parameter: number of active keyframes
+            // Hyper-parameter: max number of active keyframes
             int num_active_keyframes_{9};
+            bool is_loopclosure_active_{false};
 
             // Set old keyframes to inactive state
             void RemoveOldKeyframe();

@@ -6,6 +6,16 @@ namespace slam
     Map::Map()
     {
         num_active_keyframes_ = Config::Get<int>("num_active_keyframes");
+        
+        if(Config::Get<int>("loopclosure_on") >= 1)
+        {
+            is_loopclosure_active_ = true;
+        }
+        else
+        {
+            is_loopclosure_active_ = false;
+        }
+        
     }
 
     void Map::CleanMap()
@@ -153,6 +163,21 @@ namespace slam
         }
 
         CleanMap();
+
+        // Release redundant images
+        if(is_loopclosure_active_ == false)
+        {
+            /* If there is no loop closure module, delete images
+             * left and right images since they are not used anymore */
+            frame_to_remove->left_img_.release();
+            frame_to_remove->right_img_.release();
+        }
+        else
+        {
+            /* Just delete right image. Left image can be
+             * used during loop detection */
+            frame_to_remove->right_img_.release();
+        }
     }
 
 

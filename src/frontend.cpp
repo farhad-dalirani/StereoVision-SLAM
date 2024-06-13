@@ -710,7 +710,9 @@ namespace slam
                 break;
         }
 
+        // Set the previous frame in frontend pipeline 
         last_frame_ = current_frame_;
+        
         return true;
     }
 
