@@ -45,6 +45,11 @@ FetchContent_Declare(rerun_sdk URL
     https://github.com/rerun-io/rerun/releases/latest/download/rerun_cpp_sdk.zip)
 FetchContent_MakeAvailable(rerun_sdk)
 
+# pcl 
+find_package(PCL REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 SET(G2O_LIBS g2o_csparse_extension g2o_stuff g2o_core g2o_types_slam3d g2o_solver_csparse)
 
 set(THIRD_PARTY_LIBS
@@ -55,6 +60,7 @@ set(THIRD_PARTY_LIBS
         ${CSPARSE_LIBRARY}
         ${GTEST_BOTH_LIBRARIES}
         rerun_sdk
+        ${PCL_LIBRARIES}
         )
 
 

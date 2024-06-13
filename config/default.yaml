@@ -7,6 +7,7 @@ dataset_dir: ./data/dataset/sequences/05
 left_cam_index: 0
 right_cam_index: 1
 is_color_input: 0
+output_dir: ./outputs
 
 #######################################################
 # Frontend Hyperparameters

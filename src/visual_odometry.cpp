@@ -4,6 +4,12 @@
 #include "StereoVisionSLAM/visual_odometry.h"
 #include "StereoVisionSLAM/config.h"
 #include "StereoVisionSLAM/slamexception.h"
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <pcl/point_types.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_cloud.h>
 
 namespace slam 
 {
@@ -162,7 +168,7 @@ namespace slam
                 break;
             }
         }
-        
+
         // Stop components of stereo visual slam pipeline
         if(loopclosure_)
         {
@@ -178,6 +184,9 @@ namespace slam
         {
             viewer_->Close();
         }
+
+        // Save landmarks and keyframes in file
+        saveSLAMOutputInFile();
     } 
 
     FrontendStatus VisualOdometry::GetFrontendStatus() const
@@ -185,4 +194,58 @@ namespace slam
         return frontend_->GetStatus(); 
     }
 
-}  
+    void VisualOdometry::saveSLAMOutputInFile()
+    {
+        // Save output of Stereo Visual SLAM (landmarks and keyframe poses) in file
+
+        // Output directory
+        std::string output_dir = Config::Get<std::string>("output_dir"); 
+
+        // Check if folder path exists
+        if (not(std::filesystem::exists(output_dir) && std::filesystem::is_directory(output_dir)))
+        {
+            std::cout << "Folder does not exist: " << output_dir << std::endl;
+            return;
+        }
+
+        // Create a folder with the current time as its name
+        auto now = std::chrono::system_clock::now();
+        auto in_time_t = std::chrono::system_clock::to_time_t(now);
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d_%H-%M-%S");
+        std::string new_folder_name = ss.str();
+        std::filesystem::path new_folder_path = std::filesystem::path(output_dir) / new_folder_name;
+
+        if (not std::filesystem::create_directory(new_folder_path)) 
+        {
+            std::cerr << "Failed to create folder: " << new_folder_path << std::endl;
+            return;
+        }
+
+        // Save landmarks in .pcl file
+        std::filesystem::path landmark_file_path = new_folder_path / "landmarks.pcd";
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        for(auto &id_point_pair_i: map_->GetAllMapPoints())
+        {
+            MapPoint::Ptr mappoint_i = id_point_pair_i.second;
+
+            pcl::PointXYZ point;
+            point.x = mappoint_i->pos_(0);
+            point.y = mappoint_i->pos_(1);
+            point.z = mappoint_i->pos_(2);
+            cloud->points.push_back(point);
+        }
+        cloud->width = cloud->points.size();
+        cloud->height = 1;
+        cloud->is_dense = false;
+        if (pcl::io::savePCDFileASCII(landmark_file_path, *cloud) == -1) 
+        {
+            throw SLAMException("Could not write file");
+        }
+        std::cout << "Saved " << cloud->points.size() << " landmarks to " << landmark_file_path << std::endl;
+
+        // Save keyframe poses in file
+
+    }
+
+}

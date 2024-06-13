@@ -44,6 +44,8 @@ namespace slam
             Map::Ptr map_{nullptr};
             Viewer::Ptr viewer_{nullptr};
             Dataset::Ptr dataset_{nullptr};
+
+            void saveSLAMOutputInFile();
     };
 
 }  
