@@ -58,8 +58,10 @@ namespace slam
             Camera::Ptr cam_left_{nullptr};
             Camera::Ptr cam_right_{nullptr};
             
-            // Keyframe id of most recent keyframe in backend pipeline
+            /* Keyframe id of most and least recent active keyframe 
+             * in backend pipeline */
             unsigned long max_keyframe_id_in_pipeline_{0};
+            unsigned long min_keyframe_id_in_pipeline_{0};
 
             // Robust Kernel threshold
             double chi2_th_{5.991};

@@ -68,6 +68,8 @@ namespace slam
             /* After detecting loop, correct pose of keyframes and
              * position of landmarks accordingly */
             void LoopClosureUpdate();
+            // Global Pose Graph optimization
+            void PoseGraphOptimization();
             // Process new keyframes with Loop Closure pipeline
             void LoopClosurePipeline();
             
@@ -135,6 +137,9 @@ namespace slam
              * current keyframe and a candidate keyframe for loop closure
              * to count the candidate as a successful loop */
             int min_num_acceptable_keypoint_match_{11};
+            /* If true perform a pose graph optimization considering all 
+             * landmarks and keyframes */
+            bool global_pose_graph_optimization_{true};
     };
 
 }

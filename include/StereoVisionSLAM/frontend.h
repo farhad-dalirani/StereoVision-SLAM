@@ -66,6 +66,11 @@ namespace slam
              * pose of the current frame. */
             Sophus::SE3d relative_motion_;
 
+            // Current keyframe in frontend pipeline
+            Frame::Ptr frontend_current_kf_{nullptr};
+            // Previous keyframe in frontend pipeline
+            Frame::Ptr frontend_prev_kf_{nullptr};
+
             /* Number of tracked features from last frame to current frame
              * that mark as inliers, it used to determine current frame is
              * keyframe or not */

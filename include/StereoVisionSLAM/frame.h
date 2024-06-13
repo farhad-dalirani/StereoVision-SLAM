@@ -48,12 +48,20 @@ namespace slam
              * to which feature_left_. Just used in loop 
              * closure pipeline */
             std::vector<size_t> desc_feat_indx_;
+            
             // A pointer to the keyframe that forms a loop with this keyframe
             std::weak_ptr<Frame> loop_keyframe_;
             /* Transformation from detected loop keyframe to
              * corrected pose of this keyframe. Just used in loop 
              * closure pipeline */
             Sophus::SE3d loop_relative_pose_;
+            
+            // A pointer to the keyframe that comes before this keyframe in time
+            std::weak_ptr<Frame> prev_keyframe_;
+            /* Transformation from previous keyframe to this keyframe. Just used in  
+             * loop closure pipeline. Just used in loop closure pipeline */
+            Sophus::SE3d relative_pose_pkf_;
+
 
             Frame(){}
             Frame(long id, double time_stamp, const Sophus::SE3d &pose,

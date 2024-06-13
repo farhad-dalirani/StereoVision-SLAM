@@ -229,7 +229,10 @@ namespace slam
             return false;
         }
 
-        // itialize map
+        // Set current keyframe in frontend pipeline
+        frontend_current_kf_ = current_frame_;
+
+        // Itialize map
         bool build_map_success = BuildInitMap();
         if(build_map_success)
         {
@@ -586,6 +589,17 @@ namespace slam
         current_frame_->SetKeyFrame();
         map_->InsertKeyFrame(current_frame_);
 
+        // Set previous and current keyframes of frontend pipeline
+        frontend_prev_kf_ = frontend_current_kf_;
+        frontend_current_kf_ = current_frame_;
+        
+        // Connect previous and current keyframes
+        current_frame_->prev_keyframe_ = frontend_prev_kf_;
+        
+        // Set Relative pose from previous keyframe to current keyframe
+        current_frame_->relative_pose_pkf_ = current_frame_->Pose() *
+                                                frontend_prev_kf_->Pose().inverse();
+        
         if(viewer_)
         {
             viewer_->LogInfo(std::string("Frontend: Set frame ") + 
@@ -665,7 +679,7 @@ namespace slam
 
         // Relative pose of current frame and last frame
         relative_motion_ = current_frame_->Pose() * last_frame_->Pose().inverse();
-
+        
         return true;
     }
 

@@ -33,6 +33,7 @@ namespace slam
 
     void Viewer::Close() 
     {
+        UpdateMap();
         rec.log("world/log", rerun::TextLog("Finished"));
     }
 

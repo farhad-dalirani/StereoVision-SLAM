@@ -27,6 +27,9 @@ namespace slam
             int observed_times_{0};
             // Keypoint features corresponding to the point in different frames  
             std::list<std::weak_ptr<Feature>> observations_;
+            /* First keypoint feature in time corresponding to the point in
+             * different frames. Just used in loop closure pipeline */
+            std::weak_ptr<Feature> first_valid_obs_;
 
             MapPoint(){}
             MapPoint(unsigned long id, const Eigen::Vector3d &pos);

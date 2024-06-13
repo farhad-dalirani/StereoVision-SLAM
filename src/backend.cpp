@@ -21,7 +21,7 @@ namespace slam
          * + 3 for rotation), and the observations are 3D landmarks (map points). */
         typedef g2o::BlockSolver_6_3 BlockSolverType;
         
-        // Linear solver for solving linear subproblem during no-linear optimization
+        // Linear solver for solving linear subproblem during non-linear optimization
         typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType;
 
         /* Levenberg-Marquardt algorithm, which is used for nonlinear least squares optimization
@@ -38,6 +38,7 @@ namespace slam
         // Add keyframe vertices to optimization graph
         std::map<unsigned long, VertexPose *> vertices;
         unsigned long max_kf_id{0};
+        unsigned long min_kf_id{10000000000};
         for(auto &keyframe: keyframes)
         {
             // Retreive keyframe
@@ -55,10 +56,16 @@ namespace slam
             {
                 max_kf_id = kf->keyframe_id_;
             }  
+            if(kf->keyframe_id_ < min_kf_id)
+            {
+                min_kf_id = kf->keyframe_id_;
+            }  
+            
 
             vertices.insert({kf->keyframe_id_, vertex_pose});
         }
         max_keyframe_id_in_pipeline_ = max_kf_id;
+        min_keyframe_id_in_pipeline_ = min_kf_id;
 
         // Camera intrinsic parameter
         Eigen::Matrix3d K_left = cam_left_->K();
@@ -221,6 +228,21 @@ namespace slam
         for (auto &v : vertices_landmarks) 
         {
             landmarks.at(v.first)->SetPos(v.second->estimate());
+        }
+
+        /* For keyframes update their relative pose to 
+         * their previous keyframe */
+        for(auto &id_kf_pair_i: keyframes)
+        {
+            if(id_kf_pair_i.first == 0)
+            {
+                continue;
+            }
+
+            Frame::Ptr kf_i = id_kf_pair_i.second;
+            Frame::Ptr kf_prev = kf_i->prev_keyframe_.lock();
+
+            kf_i->relative_pose_pkf_ = kf_i->Pose() * kf_prev->Pose().inverse();
         }
 
     }

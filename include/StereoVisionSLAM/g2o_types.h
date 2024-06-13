@@ -18,7 +18,8 @@
 namespace slam
 {
     /* Definitions of custom vertices and edges for g2o graph-based 
-     * non-linear optimization used in the frontend and backend.
+     * non-linear optimization used in the frontend, backend and 
+     * loop closure.
      */
 
     class VertexPose: public g2o::BaseVertex<6, Sophus::SE3d>
@@ -225,6 +226,44 @@ namespace slam
              * of the reference camera in the stereosystem to this camera's 
              * coordinate system */
             Sophus::SE3d _cam_ext;
+    };
+    
+    class EdgePoseGraph: public g2o::BaseBinaryEdge<6, Sophus::SE3d, VertexPose, VertexPose>
+    {
+        /* This class represents edges in a pose optimization using the g2o framework to 
+         * perform pose graph optimization.
+         * In the optimization, vertices are the poses of keyframes, and the edges
+         * are the transformations between consecutive keyframes and also keyframes 
+         * involved in a loop. 
+         * 
+         * For more information see Chapter 10 (loop closure) of
+         * "Introduction to Visual SLAM: From Theory to Practice" 
+         * by Xiang Gao and Tao Zhang.
+         */
+
+        public:
+            EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+            virtual void computeError() override
+            {
+                // A vertex in the created g2o graph
+                const VertexPose *current_vertex = static_cast<VertexPose *>(_vertices[0]);
+                /* The vertex that belong to the keyframe that comes before vertex_0
+                 * in time (the previous keyframe of the keyframe of vertex_0) */
+                const VertexPose *previous_vertex = static_cast<VertexPose *>(_vertices[1]);
+                
+                // Get poses of the two keyframes
+                Sophus::SE3d v_0 = current_vertex->estimate();
+                Sophus::SE3d v_1 = previous_vertex->estimate();
+                
+                /* Calculating the error between the estimated and measured
+                 * relative transformation between to vertices */
+                _error = (_measurement.inverse() * v_0 * v_1.inverse()).log();
+            }
+
+            // Function for read and write edge from/in file. Not implemented.
+            virtual bool read(std::istream &in) override { return true; }
+            virtual bool write(std::ostream &out) const override { return true; }
     };
 
 }

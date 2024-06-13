@@ -27,6 +27,12 @@ namespace slam
         std::unique_lock<std::mutex> lck(data_mutex_);
         observations_.push_back(feature);
         observed_times_++;
+
+        // Set first valid keypoint feature that observe the map point
+        if((first_valid_obs_.expired()) and (feature->outlier_==false))
+        {
+            first_valid_obs_ = feature;
+        }
     }
 
     void MapPoint::RemoveObservation(Feature::Ptr feature)
@@ -50,6 +56,25 @@ namespace slam
                 break;
             } 
         }
+
+        /* If first valid keypoint feature that observe the map point is no
+         * longer valid, select a new one */
+        if((first_valid_obs_.lock() == feature) and (feature->outlier_ == true))
+        {
+            for(auto iter{observations_.begin()}; iter != observations_.end(); iter++)
+            {
+                Feature::Ptr feat_i = iter->lock();
+                if(feat_i)
+                {
+                    if((feat_i->outlier_ == false) and (feat_i->map_point_.lock()))
+                    {
+                        first_valid_obs_ = feat_i;
+                        break;
+                    }
+                }
+            }
+        }
+
     }
     
     std::list<std::weak_ptr<Feature>> MapPoint::GetObs()
