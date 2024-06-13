@@ -66,7 +66,6 @@ namespace slam
             Frame(){}
             Frame(long id, double time_stamp, const Sophus::SE3d &pose,
                   const cv::Mat &left_img, const cv::Mat &right_img);
-            Frame& operator=(const Frame& other);
             
             Sophus::SE3d Pose();
             void SetPose(const Sophus::SE3d &pose);

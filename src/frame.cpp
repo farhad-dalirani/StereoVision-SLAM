@@ -34,37 +34,4 @@ namespace slam
         keyframe_id_ = keyframe_factory_id++;
     }
 
-    Frame& Frame::operator=(const Frame& other) 
-    {
-        // Check for self-assignment
-        if (this != &other) 
-        {
-            // Copy data members from 'other' to 'this'
-            id_ = other.id_;
-            keyframe_id_ = other.keyframe_id_;
-            is_keyframe_ = other.is_keyframe_;
-            pose_ = other.pose_;
-            // Deep copy of cv::Mat
-            left_img_ = other.left_img_.clone(); 
-            right_img_ = other.right_img_.clone(); 
-            time_stamp_ = other.time_stamp_;
-            // Deep copy of feature vectors
-            feature_left_.clear();
-            for (const auto& feature : other.feature_left_) 
-            {
-                feature_left_.push_back(std::make_shared<Feature>(*feature));
-            }
-            feature_right_.clear();
-            for (const auto& feature : other.feature_right_) 
-            {
-                if (feature)
-                    feature_right_.push_back(std::make_shared<Feature>(*feature));
-                else
-                    feature_right_.push_back(nullptr);
-            }
-        }
-        return *this;
-    }
-
-
 }
