@@ -110,15 +110,6 @@ namespace slam
                 rec.log(entity_name, 
                         rerun::Image(tensor_shape(kf_sort[0].second->left_img_), 
                                     rerun::TensorBuffer::u8(kf_sort[0].second->left_img_)));
-
-                // plot features of active keyframe
-                std::vector<rerun::Position2D> kps;
-                for(auto &feat_i: kf_sort[0].second->feature_left_)
-                {
-                    kps.push_back(rerun::Position2D(feat_i->position_.pt.x, feat_i->position_.pt.y));
-                }
-                rec.log(entity_name, rerun::archetypes::Points2D(kps).with_colors(rerun::Color(0, 255, 0)));
-
             }
         }
 
