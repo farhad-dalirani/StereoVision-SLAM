@@ -528,10 +528,14 @@ namespace slam
 
         if(viewer_)
         {
+            int cnt_inlier = features.size() - cnt_outlier;
             viewer_->LogInfo(std::string("Frontend: Outlier/Inlier in pose estimating: ") +
                             std::to_string(cnt_outlier) + "/" + 
-                            std::to_string(features.size() - cnt_outlier),
+                            std::to_string(cnt_inlier),
                             "frontend");
+
+            viewer_->Plot("plots/frontend_inlier_ratio", (cnt_inlier/static_cast<double>(features.size())), 
+                           frontend_current_kf_->keyframe_id_);
         }
 
         // Set pose of current frame

@@ -218,6 +218,8 @@ namespace slam
                             std::to_string(cnt_outlier) + "/" + std::to_string(cnt_inlier),
                             max_keyframe_id_in_pipeline_,
                             "backend");
+            viewer_->Plot("plots/backend_inlier_ratio", (cnt_inlier/static_cast<double>(cnt_inlier+cnt_outlier)), 
+                           max_keyframe_id_in_pipeline_);
         }
 
         // Update keyframes' pose and landmarks' position with optimized vaules 
