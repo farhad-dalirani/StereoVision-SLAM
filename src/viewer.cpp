@@ -70,7 +70,9 @@ namespace slam
             
             if (i != 0)
             {
-                // Transform to coordinate of most recent active frame
+                /* Transform i'the keyframe to coordinate of most recent active frame.
+                 * It is more visually comfortable to fix most recent keyframe fix and 
+                 * show other data with respect to it */
                 Sophus::SE3d Twc0 = kf_sort[0].second->pose_.inverse() * camera_left_->pose_inv_;
                 Sophus::SE3d Twci = kf_sort[i].second->pose_.inverse() * camera_left_->pose_inv_;
                 Sophus::SE3d Tcic0 = Twci.inverse() * Twc0;
@@ -98,10 +100,17 @@ namespace slam
                 rec.log(entity_name, 
                         rerun::Image(tensor_shape(kf_sort[0].second->left_img_), 
                                     rerun::TensorBuffer::u8(kf_sort[0].second->left_img_)));
+
+                // plot features of active keyframe
+                std::vector<rerun::Position2D> kps;
+                for(auto &feat_i: kf_sort[0].second->feature_left_)
+                {
+                    kps.push_back(rerun::Position2D(feat_i->position_.pt.x, feat_i->position_.pt.y));
+                }
+                rec.log(entity_name, rerun::archetypes::Points2D(kps).with_colors(rerun::Color(0, 255, 0)));
+
             }
         }
-
-        
 
         // Draw active landmarks (map points) in coordinate of newest active keyframe
         Sophus::SE3d Twc0 = kf_sort[0].second->pose_.inverse() * camera_left_->pose_inv_;
