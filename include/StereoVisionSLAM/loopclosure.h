@@ -137,6 +137,13 @@ namespace slam
              * current keyframe and a candidate keyframe for loop closure
              * to count the candidate as a successful loop */
             int min_num_acceptable_keypoint_match_{11};
+            /* Do not perform pose correction if after loop detection the
+             * pose previous and new value difference is smaller that this */
+            double min_pose_differnece_between_old_new_{1};
+            /* If after loop detection, difference between new pose and old  
+             * pose difference is higher than this value, ignore loop. It is
+             * potential for error */
+            double max_pose_differnece_between_old_new_{50};
             /* If true perform a pose graph optimization considering all 
              * landmarks and keyframes */
             bool global_pose_graph_optimization_{true};

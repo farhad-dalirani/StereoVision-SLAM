@@ -51,6 +51,10 @@ namespace slam
         {
             global_pose_graph_optimization_ = false;
         }
+        min_pose_differnece_between_old_new_ = 
+            Config::Get<double>("min_pose_differnece_between_old_new");
+        max_pose_differnece_between_old_new_ = 
+            Config::Get<double>("max_pose_differnece_between_old_new");
 
         // Keypoint feature descriptor and matcher
         orb_descriptor_ = cv::ORB::create(400);
@@ -404,7 +408,14 @@ namespace slam
         double pose_diff = (current_keyframe_->Pose() *
                                 current_frame_corrected_pose_.inverse()).log().norm();
 
-        if(pose_diff > 1)
+        /* If new calculated and old value pose difference is high, it is potential
+         * for miss calculation. Ignore it. */
+        if(pose_diff > max_pose_differnece_between_old_new_)
+        {
+            return false;
+        }
+
+        if(pose_diff > min_pose_differnece_between_old_new_)
         {
             need_correction_ = true;
         }
