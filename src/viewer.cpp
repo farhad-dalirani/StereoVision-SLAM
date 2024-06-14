@@ -29,10 +29,6 @@ namespace slam
         rec.log_static(
                         "plots/loop_deep_score", 
                         rerun::SeriesLine().with_color({255, 0, 0}).with_name("Loop Closure Deep Score").with_width(2));
-        /* For plotting ratio of inlier in total landmarks after backend optimization */
-        rec.log_static(
-                        "plots/backend_inlier_ratio", 
-                        rerun::SeriesLine().with_color({255, 255, 0}).with_name("Backend lanmark inlier ratio").with_width(2));
         /* For plotting ratio of inlier in total landmarks after frontend optimization */
         rec.log_static(
                         "plots/frontend_inlier_ratio", 
