@@ -255,6 +255,15 @@ namespace slam
             }
         }
 
+        // If visualization enable, plot score for keyframe
+        if(viewer_)
+        {
+            viewer_->Plot("plots/loop_deep_score", 
+                 max_similarity, 
+                 current_keyframe_->keyframe_id_);
+            
+        }
+
         /* If max similarity does not pass strong threshold for score or 
          * there are to many similar keyframe with high matching score, 
          * it means no potential loop candidate */

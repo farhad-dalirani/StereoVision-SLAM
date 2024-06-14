@@ -24,6 +24,12 @@ namespace slam
         // World orgin
         rec.log_static("world", rerun::ViewCoordinates::RIGHT_HAND_Z_UP); // Set an up-axis
 
+        /* For keyframe plot their highest similarity score with other
+         * keyframes obtained by deep network */
+        rec.log_static(
+                        "plots/loop_deep_score", 
+                        rerun::SeriesLine().with_color({255, 0, 0}).with_name("Loop Closure Deep Score").with_width(2));
+                        
         // Set costum timing for illustrating data
         rec.set_time_sequence("max_keyframe_id", 0);
 
@@ -173,5 +179,19 @@ namespace slam
         rec.log("world/log", rerun::TextLog(msg).with_color(log_color.at(log_type)));
     }
 
+    void Viewer::Plot(std::string plot_name, double value, unsigned long maxkeyframe_id)
+    {
+        // Rerun log with given keyframe id
+        if(current_frame_)
+        {
+            rec.set_time_sequence("currentframe_id", current_frame_->id_);
+        }
+        else
+        {
+            rec.set_time_sequence("currentframe_id", 0);
+        }
+        rec.set_time_sequence("max_keyframe_id", maxkeyframe_id);
+        rec.log(plot_name, rerun::Scalar(value));
+    }
 
 }  

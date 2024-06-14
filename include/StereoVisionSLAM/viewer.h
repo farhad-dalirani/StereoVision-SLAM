@@ -37,6 +37,8 @@ namespace slam
             void LogInfoMKF(std::string msg, unsigned long maxkeyframe_id,
                              std::string log_type);
 
+            void Plot(std::string plot_name, double value, unsigned long maxkeyframe_id);
+
         private:
             
             const rerun::RecordingStream rec = rerun::RecordingStream("rerun_Stereo_Vision_SLAM");
