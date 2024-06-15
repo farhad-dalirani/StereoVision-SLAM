@@ -90,6 +90,17 @@ namespace slam
         return cameras_.at(camera_id);
     }
 
+    std::string Dataset::GetDataDir()
+    {
+        return dataset_path_;
+    }
+    
+    int Dataset::GetLeftCamIndex()
+    {
+        return left_cam_index_;
+    }
+
+
     Frame::Ptr Dataset::NextFrame()
     {
         // Create and return next frame in video sequence

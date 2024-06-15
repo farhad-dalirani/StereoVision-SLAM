@@ -25,6 +25,9 @@ namespace slam
             // Get camera by id
             Camera::Ptr GetCamera(int camera_id) const;
 
+            std::string GetDataDir();
+            int GetLeftCamIndex();
+
         private:
             // Root path of video sequence in KITTI
             std::string dataset_path_;

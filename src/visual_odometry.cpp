@@ -244,7 +244,67 @@ namespace slam
         }
         std::cout << "Saved " << cloud->points.size() << " landmarks to " << landmark_file_path << std::endl;
 
-        // Save keyframe poses in file
+        /* 
+        Save keyframe poses in file, File format:
+
+        dataset_dir
+        left_cam_index_in_stereo_system
+        left_camera_image_id_1, tranformation_matrix_of_frame_1 (from world to stereosystem coordinate)
+        left_camera_image_id_2, tranformation_matrix_of_frame_2 (from world to stereosystem coordinate)
+        .
+        .
+        .
+        */
+        std::filesystem::path keyframes_file_path = new_folder_path / "keyframes.txt";
+        std::ofstream kp_file(keyframes_file_path);
+
+        // Write data sequence dir path
+        kp_file << dataset_->GetDataDir() << std::endl;
+        // Write left camera index among cameras of stereo system
+        kp_file << dataset_->GetLeftCamIndex() << std::endl;
+        
+        // Sort according apearance in time
+        Map::KeyframesType all_kf_unordered_map = map_->GetAllKeyFrames();
+        std::vector<std::pair<unsigned long, Frame::Ptr>> kf_sorted_vect(
+                                                            all_kf_unordered_map.begin(), 
+                                                            all_kf_unordered_map.end());
+        sort(kf_sorted_vect.begin(), kf_sorted_vect.end(), [](
+                    const std::pair<unsigned long, Frame::Ptr>& a, 
+                    const std::pair<unsigned long, Frame::Ptr>& b) 
+                    {
+                        return a.first < b.first;
+                    });
+
+        // For each keyframe
+        for(auto &id_keyframe_i: kf_sorted_vect)
+        {
+            Frame::Ptr keyframe_i = id_keyframe_i.second;
+
+            // Write image id of left camera image of stereosystem
+            kp_file << keyframe_i->id_ << " ";
+
+            // Transformation matrix 
+            Eigen::Matrix4d Tcw = keyframe_i->Pose().matrix();
+            for(int i{0}; i < 3; i++)
+            {
+                for(int j{0}; j < 4; j++)
+                {
+                    kp_file << Tcw(i, j);
+                    
+                    if(i * 4 + j < 11)
+                    {
+                        kp_file << " ";
+                    }
+                    else
+                    {
+                        kp_file << std::endl;
+                    }
+                }
+            }
+
+
+        }
+
 
     }
 
