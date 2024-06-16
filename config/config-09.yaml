@@ -12,11 +12,11 @@ output_dir: ./outputs
 #######################################################
 # Frontend Hyperparameters
 #######################################################
-num_features: 150
-num_features_init: 50
+num_features: 200
+num_features_init: 100
 num_features_tracking: 50
 num_features_tracking_bad: 20
-num_features_needed_for_keyframe: 80
+num_features_needed_for_keyframe: 95
 max_triangulation_depth: 300.0
 # GFTT, ORB
 keypoint_feature_detector: GFTT

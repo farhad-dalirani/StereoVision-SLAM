@@ -881,6 +881,13 @@ namespace slam
     void LoopClosure::Stop() 
     {
         // Close loop closure optimization
+
+        while(IsKeyframeInWaitingList())
+        {
+            std::cout << "Waiting ..." << std::endl;
+            usleep(1000);
+        }
+
         loopclosure_running_.store(false);
         loopclosure_thread_.join();
 
