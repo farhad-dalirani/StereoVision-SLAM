@@ -12,7 +12,7 @@ output_dir: ./outputs
 #######################################################
 # Frontend Hyperparameters
 #######################################################
-num_features: 150
+num_features: 200
 num_features_init: 50
 num_features_tracking: 50
 num_features_tracking_bad: 20
@@ -43,6 +43,7 @@ max_num_weak_threshold: 3
 min_num_acceptable_keypoint_match: 15
 min_pose_differnece_between_old_new : 1
 max_pose_differnece_between_old_new : 50
+max_pose_distance_between_loop_keyframes: 20
 global_pose_graph_optimization: 1 
 
 #######################################################

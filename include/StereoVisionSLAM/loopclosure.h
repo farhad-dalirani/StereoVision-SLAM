@@ -144,6 +144,10 @@ namespace slam
              * pose difference is higher than this value, ignore loop. It is
              * potential for error */
             double max_pose_differnece_between_old_new_{50};
+            /* Maximum acceptable distance between the pose of the current keyframe
+             * in loop closure pipeline and the candidate keyframe obtained by keypoint
+             * matching. Matching between two far images is not reliable */
+            double max_pose_distance_between_loop_keyframes_{10};
             /* If true perform a pose graph optimization considering all 
              * landmarks and keyframes */
             bool global_pose_graph_optimization_{true};

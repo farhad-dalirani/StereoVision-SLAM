@@ -55,6 +55,8 @@ namespace slam
             Config::Get<double>("min_pose_differnece_between_old_new");
         max_pose_differnece_between_old_new_ = 
             Config::Get<double>("max_pose_differnece_between_old_new");
+        max_pose_distance_between_loop_keyframes_ = 
+            Config::Get<double>("max_pose_distance_between_loop_keyframes");
 
         // Keypoint feature descriptor and matcher
         orb_descriptor_ = cv::ORB::create(400);
@@ -401,6 +403,12 @@ namespace slam
         // Transformation from loop keyframe to current keyframe new pose
         current_keyframe_->loop_relative_pose_ = current_frame_corrected_pose_ * 
                                                  candid_loop_keyframe_->Pose().inverse();
+        
+        // Closing loop with two far images is not reliable 
+        if(current_keyframe_->loop_relative_pose_.log().norm() > max_pose_distance_between_loop_keyframes_)
+        {
+            return false;
+        }
 
         /* If new calculated pose of current keyframe is similar to 
          * previous value of pose, there is no need for path optimization
