@@ -164,8 +164,19 @@ namespace slam
                 }
             }
 
+            // Filter and statistical removal
+            // it considers a neighbourhood around point
+            // calculate mean and std of neighbourhood
+            // removes the point if outside the distribution
+            PointCloud::Ptr tmp(new PointCloud);
+            pcl::StatisticalOutlierRemoval<PointT> statistical_filter;
+            statistical_filter.setMeanK(50);
+            statistical_filter.setStddevMulThresh(1.0);
+            statistical_filter.setInputCloud(current);
+            statistical_filter.filter(*tmp);
+
             // Merge point could of current keyframe to map
-            *pointcloud_ += *current;
+            *pointcloud_ += *tmp;
         }
 
         // Save Dense 3D Reconstructed map 
