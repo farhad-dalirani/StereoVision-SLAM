@@ -179,9 +179,30 @@ namespace slam
             *pointcloud_ += *tmp;
         }
 
+        // Filter and statistical removal
+        // it considers a neighbourhood around point
+        // calculate mean and std of neighbourhood
+        // removes the point if outside the distribution
+        PointCloud::Ptr tmp(new PointCloud);
+        pcl::StatisticalOutlierRemoval<PointT> statistical_filter;
+        statistical_filter.setMeanK(50);
+        statistical_filter.setStddevMulThresh(1.0);
+        statistical_filter.setInputCloud(pointcloud_);
+        statistical_filter.filter(*tmp);
+        pointcloud_ = tmp;
+
+        // Voxel filter to remove keep just one point in each voxel
+        pcl::VoxelGrid<PointT> voxel_filter;
+        double resolution{0.02};
+        voxel_filter.setLeafSize(resolution, resolution, resolution);
+        PointCloud::Ptr tmp2(new PointCloud);
+        voxel_filter.setInputCloud(pointcloud_);
+        voxel_filter.filter(*tmp2);
+        pointcloud_ = tmp2;
+
         // Save Dense 3D Reconstructed map 
-        std::cout << "Saved " << pointcloud_->points.size() << " data points to test_pcd.pcd." << std::endl;
         pcl::io::savePCDFileBinary("test_pcd.pcd", *pointcloud_);
+        std::cout << "Saved " << pointcloud_->points.size() << " data points to test_pcd.pcd." << std::endl;
         
     }
 
