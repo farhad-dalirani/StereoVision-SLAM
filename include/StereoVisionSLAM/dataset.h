@@ -21,6 +21,9 @@ namespace slam
 
             // Create and return next frame in sequence
             Frame::Ptr NextFrame();
+            
+            // Create and return i-th frame in sequence
+            Frame::Ptr FrameById(unsigned long frame_id);
 
             // Get camera by id
             Camera::Ptr GetCamera(int camera_id) const;

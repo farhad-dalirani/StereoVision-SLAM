@@ -17,7 +17,7 @@ namespace slam
 
         if(Config::Get<int>("is_color_input") != 0)
         {
-            flag_read_img_ == cv::IMREAD_COLOR;
+            flag_read_img_ = cv::IMREAD_COLOR;
         }
     }
 
@@ -114,7 +114,7 @@ namespace slam
         file_name_2 << dataset_path_ << "/image_" << right_cam_index_ << 
                 "/" << std::setw(6) << std::setfill('0') << current_image_index_ << ".png";
 
-        // Load images
+        // Load images, assumed they are already rectified and undistorted.
         cv::Mat left_img = cv::imread(file_name_1.str(), flag_read_img_);
         cv::Mat right_img = cv::imread(file_name_2.str(), flag_read_img_);
 
@@ -137,5 +137,39 @@ namespace slam
         return new_frame;
     }
 
+    Frame::Ptr Dataset::FrameById(unsigned long frame_id)
+    {
+        // Create and return i-th frame in video sequence
+
+        std::ostringstream file_name_1;
+        std::ostringstream file_name_2;
+
+        // Path of left and right camera images
+        file_name_1 << dataset_path_ << "/image_" << left_cam_index_ << 
+                 "/" << std::setw(6) << std::setfill('0') << frame_id << ".png";
+        file_name_2 << dataset_path_ << "/image_" << right_cam_index_ << 
+                "/" << std::setw(6) << std::setfill('0') << frame_id << ".png";
+
+        // Load images, assumed they are already rectified and undistorted.
+        cv::Mat left_img = cv::imread(file_name_1.str(), flag_read_img_);
+        cv::Mat right_img = cv::imread(file_name_2.str(), flag_read_img_);
+
+        if ((left_img.data == nullptr) or (right_img.data == nullptr))
+        {
+            return nullptr;
+        }
+
+        // Down-sample images by factor of two for computational efficiency
+        cv::Mat left_img_resized, right_img_resized;
+        cv::resize(left_img, left_img_resized, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+        cv::resize(right_img, right_img_resized, cv::Size(), 0.5, 0.5, cv::INTER_NEAREST);
+
+        // Create new frame
+        Frame::Ptr new_frame = Frame::CreateFrame();
+        new_frame->left_img_ = left_img_resized;
+        new_frame->right_img_ = right_img_resized;
+
+        return new_frame;
+    }
 
 }

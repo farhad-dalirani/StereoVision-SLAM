@@ -11,6 +11,7 @@ add_library(StereoVisionSLAM
         visual_odometry.cpp
         dataset.cpp
         loopclosure.cpp
+        dense_reconstruction.cpp
         )
 
 target_link_libraries(StereoVisionSLAM ${THIRD_PARTY_LIBS})
