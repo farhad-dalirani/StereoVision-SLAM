@@ -8,4 +8,5 @@ lib/s*
 todo
 app/test.cpp
 app/test2.cpp
-outputs/2*
+outputs/Dense-Reconstruction-outputs/2*
+outputs/SLAM-outputs/2*
