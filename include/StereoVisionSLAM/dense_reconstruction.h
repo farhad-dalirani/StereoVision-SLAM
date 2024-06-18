@@ -13,6 +13,9 @@ namespace slam
 {
     class DenseReconstruction
     {
+        /* Uses SLAM output to create a 3D dense reconstruction of environment
+        */
+
         public:
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
             typedef std::shared_ptr<DenseReconstruction> Ptr;

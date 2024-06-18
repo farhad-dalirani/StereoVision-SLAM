@@ -3,7 +3,10 @@
 #include "StereoVisionSLAM/config.h"
 #include "StereoVisionSLAM/slamexception.h"
 #include <fstream> 
+#include <filesystem>
 #include <sstream> 
+#include <iomanip>
+
 
 namespace slam
 {
@@ -88,11 +91,16 @@ namespace slam
 
     void DenseReconstruction::DenseReconstruct()
     {
-        /* */
+        /* For each SLAM's outputed keyframe, use patch matching for the dense 3D reconstruction
+         * of stereo images, and then merge the created point cloud with the point cloud of the whole
+         * scene. */
 
         // For each keyframe
         for(int i{0}; i < keyframes_images_id_.size(); i++)
         {
+            std::cout << "Processing keyframe " << i+1 << "/" << 
+                         keyframes_images_id_.size() << "..." << std::endl;
+
             // Left and right color images
             Frame::Ptr keyframe_i = dataset_->FrameById(keyframes_images_id_[i]);
 
@@ -200,9 +208,32 @@ namespace slam
         voxel_filter.filter(*tmp2);
         pointcloud_ = tmp2;
 
+        
+        // Create path name for saving output of 3D map
+        std::string output_dir = Config::Get<std::string>("output_dir"); 
+        if (not(std::filesystem::exists(output_dir) && std::filesystem::is_directory(output_dir)))
+        {
+            std::cout << "Folder does not exist: " << output_dir << std::endl;
+            return;
+        }
+        // Create a folder with the current time as its name
+        auto now = std::chrono::system_clock::now();
+        auto in_time_t = std::chrono::system_clock::to_time_t(now);
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d_%H-%M-%S");
+        std::string new_folder_name = ss.str();
+        std::filesystem::path new_folder_path = std::filesystem::path(output_dir) / new_folder_name;
+        if (not std::filesystem::create_directory(new_folder_path)) 
+        {
+            std::cerr << "Failed to create folder: " << new_folder_path << std::endl;
+            return;
+        }
+        std::filesystem::path map_file_path = new_folder_path / "dense_map.pcd";
+        
         // Save Dense 3D Reconstructed map 
-        pcl::io::savePCDFileBinary("test_pcd.pcd", *pointcloud_);
-        std::cout << "Saved " << pointcloud_->points.size() << " data points to test_pcd.pcd." << std::endl;
+        pcl::io::savePCDFileBinary(map_file_path, *pointcloud_);
+        std::cout << "Saved " << pointcloud_->points.size() << " data points to " 
+                  << map_file_path << std::endl;
         
     }
 

@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     } 
     else 
     {
-        config_file_path = "./config/default.yaml";
+        config_file_path = "./config/stereo_slam_configs/default.yaml";
     }
     
     std::cout << "Outputs are visualized in Rerun Viewer." << std::endl;

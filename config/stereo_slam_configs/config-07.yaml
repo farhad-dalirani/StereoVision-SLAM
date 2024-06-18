@@ -1,0 +1,56 @@
+%YAML:1.0
+
+#######################################################
+# Dataset
+#######################################################
+dataset_dir: ./data/dataset/sequences/07
+left_cam_index: 0
+right_cam_index: 1
+is_color_input: 0
+output_dir: ./outputs/SLAM-outputs
+
+#######################################################
+# Frontend Hyperparameters
+#######################################################
+num_features: 150
+num_features_init: 50
+num_features_tracking: 50
+num_features_tracking_bad: 20
+num_features_needed_for_keyframe: 80
+max_triangulation_depth: 300.0
+# GFTT, ORB
+keypoint_feature_detector: GFTT
+
+#######################################################
+# Map Hyperparameters
+#######################################################
+num_active_keyframes: 10
+
+#######################################################
+# Backend Hyperparameters
+#######################################################
+backend_on: 1
+chi2_th: 5.991
+
+#######################################################
+# Loop Closure
+#######################################################
+loopclosure_on: 1
+keyframes_to_ignore_after_loop: 5
+potential_loop_weak_threshold: 0.92
+potential_loop_strong_threshold: 0.93
+max_num_weak_threshold: 3
+min_num_acceptable_keypoint_match: 11
+min_pose_differnece_between_old_new : 1
+max_pose_differnece_between_old_new : 50
+max_pose_distance_between_loop_keyframes: 30
+global_pose_graph_optimization: 1 
+
+#######################################################
+# Visualization
+#######################################################
+visualizer_on: 1
+
+#######################################################
+#              Stereo Visual SLAM                     #
+#######################################################
