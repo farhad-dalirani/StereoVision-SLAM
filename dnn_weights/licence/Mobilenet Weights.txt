@@ -1,0 +1,3 @@
+The `mobilenet_v2.onnx` file contains the weights of MobileNetV2 
+from the PyTorch library, converted to ONNX format for loading in 
+OpenCV DNN.
