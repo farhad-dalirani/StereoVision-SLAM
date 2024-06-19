@@ -1,0 +1,9 @@
+%YAML:1.0
+
+slam_output_dir: ./outputs/SLAM-outputs/2024-06-18_22-04-12/keyframes.txt
+
+left_cam_index: 2
+right_cam_index: 3
+is_color_input: 1
+
+output_dir: ./outputs/Dense-Reconstruction-outputs
