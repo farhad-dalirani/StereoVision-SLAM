@@ -1,7 +1,7 @@
 # StereoVision-SLAM
 
 
-<b>StereoVision-SLAM</b> is a simple real-time visual stereo SLAM tested on the KITTI dataset. It consists of four parallel components: Frontend, Backend, Loop-Closure, and Visualizer.
+<b>StereoVision-SLAM</b> is a simple real-time visual stereo SLAM written in Modern C++ tested on the KITTI dataset. It consists of four parallel components: Frontend, Backend, Loop-Closure, and Visualizer.
 
 <b>Frontend</b>: it is based on extracting a small number of 2D keypoints and 3D landmarks. The keypoints are tracked to the new frame using optical flow, followed by solving a non-linear optimization to obtain the new frame pose using the tracked features and their corresponding 3D map points.
 
