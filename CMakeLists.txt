@@ -35,10 +35,6 @@ Find_Package(Sophus REQUIRED)
 Find_Package(CSparse REQUIRED)
 include_directories(${CSPARSE_INCLUDE_DIR})
 
-# gtest
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
-
 # rerun
 include(FetchContent)
 FetchContent_Declare(rerun_sdk URL
