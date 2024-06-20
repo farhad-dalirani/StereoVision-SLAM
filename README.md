@@ -1,5 +1,8 @@
 # StereoVision-SLAM
 
+<p align="center">
+  <img src="readme-files/Demo-Stereo-Visual-SLAM-Long-ezgif.com-video-to-gif-converter.gif" alt="Alt Text">
+</p>
 
 <b>StereoVision-SLAM</b> is a real-time visual stereo SLAM (Simultaneous Localization and Mapping) written in Modern C++ tested on the KITTI dataset. This project is intentionally straightforward and thoroughly commented for educational purposes, consisting of four components: Frontend, Backend, Loop-Closure, and Visualizer.
 
@@ -14,10 +17,6 @@
 - <b>Dense 3D Reconstruction</b>: There is another component that is not part of StereoVision-SLAM; however, the output of StereoVision-SLAM can be fed into it to generate a colored dense 3D reconstruction of the input video. It utilizes the pose of keyframes in world coordinate system and the left and right images of these keyframes for stereo system depth estimation to create a dense map.
 
 <p align="center">
-  <img src="readme-files/Demo-Stereo-Visual-SLAM-Long-ezgif.com-video-to-gif-converter.gif" alt="Alt Text">
-</p>
-
-<p align="center">
   <img src="readme-files/Demo-Dense-3D-Reconstruction-ezgif.com-video-to-gif-converter.gif" alt="Alt Text">
 </p>
 
@@ -25,16 +24,15 @@
 ## How to Use
 
 ### Dependencies
-The program uses C++ 17 and depends of the following libraries and frameworks for matrix operation, Lie Group and Lie Algebra, geometric transformations, computer vision, point cloud processing, visualization and non-linear graph based optimization:
+The program uses C++ 17 and depends of the following libraries and frameworks for matrix operation, Lie Group and Lie Algebra, geometric transformations, computer vision, point cloud processing, visualization and non-linear graph based optimization (The versions mentioned are the ones I have tested):
 
-- Eigen
+- Eigen (3.4.0)
 - Sophus
-- csparse
-- Suitesparse
-- G2O
-- PCL
-- Rerun and Rerun Viewer
-- OpenCV
+- Suitesparse/csparse (7.7.0)
+- G2O (0.1)
+- PCL (1.12)
+- Rerun and Rerun Viewer (0.16.1)
+- OpenCV (4.5.4)
 
 ### Running The Program
 
