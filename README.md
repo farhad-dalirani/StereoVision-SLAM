@@ -24,19 +24,58 @@
 ## How to Use
 
 ### Dependencies
-The program uses C++ 17 and depends of the following libraries and frameworks for matrix operation, Lie Group and Lie Algebra, geometric transformations, computer vision, point cloud processing, visualization and non-linear graph based optimization (The versions mentioned are the ones I have tested):
+The program uses C++ 17 and depends of the following libraries and frameworks for matrix operation, Lie Group and Lie Algebra, geometric transformations, computer vision, point cloud processing, visualization and non-linear graph based optimization (The versions mentioned are the ones I have tested the project on, using Ubuntu 22):
 
 - Eigen (3.4.0)
 - Sophus
 - Suitesparse/csparse (7.7.0)
 - G2O (0.1)
 - PCL (1.12)
-- Rerun and Rerun Viewer (0.16.1)
+- Rerun Viewer and Rerun (0.16.1)  [See reference 6]
 - OpenCV (4.5.4)
+
+### Data and Config Files
+- Config files for the SLAM pipeline and 3D dense reconstructions are in the config folder. These config files contain input data locations, output path, hyper-parameters for the front end, back end, loop closure, visualization, etc. Each KITTI sequence has one config file and you can change hyperparameters to obtain better results.
+- Download the KITTI odometry dataset[5], both gray and color images, and put it in the data folder. If you use another location, you should change the path of the input sequence in the config files. The default structure is as follows:
+
+```
+data
+└── dataset
+    └── sequences
+        ├── 00
+        │   ├── calib.txt
+        │   ├── image_0
+        │   ├── image_1
+        │   ├── image_2
+        │   ├── image_3
+        │   └── times.txt
+        ├── 01
+        .
+        .
+        .
+```
 
 ### Running The Program
 
+- First, install the dependencies.
+- Provide data as described above.
+- Navigate to the root directory of the project.
+- Enter `./build.sh` in the terminal to compile the project using cmake. The executables will be in the bin folder.
+- Now run rerun-viewer [6] by entering `rerun` in the terminal. To later see outputs correctly I saved visualization setting of rerun-viewer in a file. It is suggested after opening rerun viewer from drop down menu select `open...` and load `rerun-io-rbl/rerun_stereo_vision_slam.rbl`.
+- Execute the SLAM pipeline on one of the provided config files or your own config file like this:
+```
+ ./bin/run_stereo_visual_SLAM ./config/stereo_slam_configs/config-05.yaml 
+``` 
+- The SLAM output during execution will be displayed in the Rerun-Viewer, like the first gif.
+- The SLAM output, including the pose of keyframes and sparse landmarks, will be written to the files `keyframes.txt` and `landmarks.pcd` in the output path specified in the config file. The 3D dense reconstruction uses `keyframes.txt`. If desired, you can use `pcl_viewer` to visualize `landmarks.pcd`.
+<p align="center">
+  <img src="readme-files/SLAM-lanmarks-sparse.jpg" alt="Alt Text"  width="500">
+</p>
 
+- To perform dense 3D reconstructions on the SLAM output of a sequence, create a config file similar to the provided ones and then enter a command like this in the terminal. The output is a `.pcd` file, similar to the second gif, which you can visualize with `pcl_viewer`:
+```
+./bin/run_dense_reconstruction config/dense_3D_reconstruction_configs/config-05.yaml
+```
 
 ## Demo
 
@@ -52,3 +91,5 @@ The program uses C++ 17 and depends of the following libraries and frameworks fo
 4- Pytorch Mobilenet V2 [[Link](https://pytorch.org/hub/pytorch_vision_mobilenet_v2/)]
 
 5- KITTI Dataset [[Link](https://www.cvlibs.net/datasets/kitti/eval_odometry.php)]
+
+6- Rerun [[Link](https://rerun.io/)][[Link](https://rerun.io/docs/getting-started/installing-viewer)][[Link](https://github.com/rerun-io/rerun)]
