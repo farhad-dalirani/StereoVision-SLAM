@@ -35,8 +35,8 @@ The program uses C++ 17 and depends of the following libraries and frameworks fo
 - OpenCV (4.5.4)
 
 ### Data and Config Files
-- Config files for the SLAM pipeline and 3D dense reconstructions are in the config folder. These config files contain input data locations, output path, hyper-parameters for the front end, back end, loop closure, visualization, etc. Each KITTI sequence has one config file and you can change hyperparameters to obtain better results.
-- Download the KITTI odometry dataset[5], both gray and color images, and put it in the data folder. If you use another location, you should change the path of the input sequence in the config files. The default structure is as follows:
+- The config files for the SLAM pipeline and 3D dense reconstructions are in the config folder. These config files contain input data locations, output paths, and hyperparameters for the front end, back end, loop closure, visualization, etc. Each KITTI sequence has one config file, and you can change the hyperparameters to obtain better results.
+- Download the KITTI odometry dataset[5], including both gray and color images, and place it in the data folder. If you use another location, you should change the path of the input sequence in the config files. The default structure is as follows::
 
 ```
 data
@@ -78,8 +78,15 @@ data
 ```
 
 ## Demo
+- For a demo of Stereo Visual SLAM, see this video:[Link](https://youtu.be/RwKpA9GsXdk)
+- For a demo of 3D dense reconstruction, see this video:[Link](https://youtu.be/MN_yaq5I84A)
 
-
+## Todo List
+- Detect specular areas in the images to increase robustness.
+- Use the Direct method instead of optical flow for tracking keypoints for more speed up.
+- The frontend and backend work well; however, loop closure should be replaced by a more accurate and robust method that requires fewer hyperparameters and heuristics.
+- Improve path fusion after loop detection.
+- Currently, colored dense 3D reconstruction utilizes stereo depth calculation with patch matching and the pose of the stereo system in world coordinates from the SLAM pipeline's output to create a dense map. It can benefit from better depth estimation and adding optimizations to seamlessly integrate local dense 3D reconstructions from each keyframe into a complete dense map.
 
 ## References
 1- "Introduction to Visual SLAM From Theory to Practice" by  Xiang Gao and Tao Zhang, Springer Singapore, [[Link](https://link.springer.com/book/10.1007/978-981-16-4939-4)]
