@@ -57,6 +57,7 @@ set(THIRD_PARTY_LIBS
         ${GTEST_BOTH_LIBRARIES}
         rerun_sdk
         ${PCL_LIBRARIES}
+        fmt
         )
 
 
